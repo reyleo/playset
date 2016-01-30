@@ -483,6 +483,7 @@ var Game = (function(){
 		} else {
 			t.remove();
 			playerFail();
+			cards().removeClass('hint selected');
 		}
 		
 	}
