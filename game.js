@@ -443,16 +443,18 @@ var Game = (function(){
 		$('.player-area').on(_eventName, function(){
 			// exit if not first :)
 			var clicked = $(this);
-			var playerId = clicked.data('player');
+			var clickedId = clicked.data('player');
 			
 			if (_player != null) {
-				_queue.push(_players[playerId]);
-				clicked.addClass('queue');
+				if (_player.id != clickedId) {
+					_queue.push(_players[clickedId]);
+					clicked.addClass('queue');
+				}
 				return;
 			}
 			
 			$('#gameMessage').hide();
-			_player = _players[playerId];
+			_player = _players[clickedId];
 			clicked.addClass('clicked');
 			
 			// Queue
@@ -517,6 +519,7 @@ var Game = (function(){
 		$('.player-area').remove();
 		for (var i = 0; i < count; i++) {
 			_players.push({
+				id: i,
 				name: "",
 				wins: 0,
 				fails: 0,
