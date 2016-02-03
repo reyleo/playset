@@ -1,5 +1,5 @@
 	body {
-		background-color: #fff;
+		background-color: #eeeded;
 		font-family: 'Roboto Condensed', sans-serif;
 		margin: 0;
 		padding: 0;
@@ -8,7 +8,7 @@
 		position: absolute;
 		width: 100%;
 		height: 100%;
-		background-color: #FFF;
+		background-color: #eeeded;
 		padding-left: 36pt;
 		padding-right: 36pt;
 		padding-top: 36pt;
@@ -21,7 +21,7 @@
 		width: 100%;
 		height: 100%;
 		box-sizing: border-box;
-		background-color: #FFF;		
+		background-color: #eeeded;		
 		/* old setup
 		position: absolute;
 		width: 95%;
@@ -47,14 +47,15 @@
 		left: 0;
 		box-sizing: border-box;
 		border: 1px solid #EEE;
-		box-shadow: 0 3px 0 1px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 		text-align: center;
 		background-color: white;
-		padding: .9em .6em;
+		padding: 15% 10%; /*.9em .6em*/
 	}
 	.selected {
 		/*border-color: black;*/
-		background-color: lightgray;
+		/*background-color: lightgray;*/
+		box-shadow: 0 10px 20px rgba(0,0,0,0.19)
 	}
 	.hint {
 		background-color: #ec0;
@@ -67,7 +68,7 @@
 	.player-area {
 		position: absolute;
 		border-radius: 18pt;
-		background-color: #eee;
+		background-color: #b8b6b6;
 		font-family: sans-serif;
 		font-size: 20pt;
 		font-weight: bold;
@@ -163,11 +164,13 @@
 		font-weight: bold;
 	}
 	.player-area .fail-counter {
-		background-color: #111;
+		/*background-color: #111;*/
+		background: linear-gradient(to bottom, #444 0%,#111 100%);
 		color: #fff;
 	}
 	.player-area .win-counter {
-		background-color: #fff;
+		background: linear-gradient(to bottom, #f8f8f8 0%,#e8e8e8 100%);
+		/*background-color: #fff;*/
 		color: #111;
 	}
 	.player-area.clicked {
@@ -197,7 +200,9 @@
 		padding-bottom: 12pt;
 		background-color: #333;
 		display: none;
-		box-shadow: 1pt 1pt 0 1pt rgba(0, 0, 0, 0.2); 
+		/*box-shadow: 1pt 1pt 0 1pt rgba(0, 0, 0, 0.2);*/
+		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
+		border-radius: 3px; 
 		z-index: 100;
 	}
 	

@@ -31,7 +31,7 @@ Card.prototype.render = function() {
 			svg.setAttribute('class', "symbol");
 			svg.setAttribute('viewBox','0 0 200 100');
 			svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-			
+
 			symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
 			/*
 			symbol = document.createElementNS(svgNS, "use");
@@ -41,7 +41,7 @@ Card.prototype.render = function() {
 			*/
 			symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
 
-			
+
 			svg.appendChild(symbol);
 			group.appendChild(svg);
 		}
@@ -50,12 +50,12 @@ Card.prototype.render = function() {
 };
 
 var Game = (function(){
-	
+
     var _board = null;
     var _deck = [];
 	var _next = 0;
 	var _counter = null;
-	var boardPadding = 0; 
+	var boardPadding = 0;
 	var _players = [];
 	var _player = null;
 	var _queue = [];
@@ -76,7 +76,7 @@ var Game = (function(){
 		maxTime: 10,
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
-	
+
     function deal(animation) {
 		var animate = animation || false;
         var places = document.querySelectorAll('#gameBoard .cardHolder');
@@ -93,11 +93,17 @@ var Game = (function(){
 					card.dom = elem;
 					card.render();
 					places[i].appendChild(elem);
-					
+
 					if (animate) {
 						//elem.style.display = 'none';
+						/*
 						$(elem).css('width', 0);
 						$(elem).animate({width: config.cardWidth + 'px'}, 500);
+						*/
+						$(elem).css('margin-left', '-25%');
+						$(elem).css('opacity', 0);
+						$(elem).animate({'margin-left': 0, 'opacity': 1}, 400);
+
 					}
 				} else {
 					break;
@@ -123,9 +129,11 @@ var Game = (function(){
 		}
 		return card;
 	}
-	
+	/*
+     * Shuffle cards in the deck
+     */
 	function shuffle() {
-		var count = _deck.length, pos, temp;	
+		var count = _deck.length, pos, temp;
 		while (count > 0) {
 			pos = Math.floor(Math.random() * count);
 			count -= 1;
@@ -134,25 +142,25 @@ var Game = (function(){
 			_deck[pos] = temp;
 		}
 	}
-	
+
 	function findSet() {
 		var cards = $('#gameBoard .card');
 		var combination = [0, 1, 2];
 		var selection;
-		var j, k, m, max = cards.length - 1; 
+		var j, k, m, max = cards.length - 1;
 		var n = combination.length - 1;
 
 		do {
-			
+
 			selection = [];
 
-			for (j = 0; j < combination.length; j++) { 
+			for (j = 0; j < combination.length; j++) {
 				selection.push(cards.get(combination[j]));
 			}
 			if (checkSet(selection)) {
 				return selection;
 			}
-			
+
 			if (combination[n] >= max) {
 				for (k = n, m = max-1; k >=0; k--,m--) {
 					if (combination[k] < m) {
@@ -166,21 +174,21 @@ var Game = (function(){
 				if (k < 0) {
 					break;
 				}
-				
+
 			} else {
 				combination[n]++;
 			}
-			
-			
+
+
 		} while (true);
 
 		return null;
 	}
-	
+
 	function nextCombination(p, max) {
-		var pos = p.length - 1, 
+		var pos = p.length - 1,
 			pos2;
-		
+
 		if (p[pos] >= max) {
 			p[pos] = 0;
 			pos2 = pos - 1;
@@ -193,15 +201,15 @@ var Game = (function(){
 					break;
 				}
 			}
-			
+
 			if (pos2 < 0) return false;
-			
+
 		} else {
 			p[pos] += 1;
 		}
 		return true;
 	}
-	
+
 	function restart() {
 		_next = 0;
 		clear();
@@ -211,7 +219,7 @@ var Game = (function(){
 			resetScore();
 		}
 	}
-	
+
 	function resetScore() {
 		var p;
 		for (var i = 0; i < _players.length; i++) {
@@ -221,7 +229,7 @@ var Game = (function(){
 		}
 		$('.win-counter,.fail-counter').html('0');
 	}
-			
+
 	function clear() {
 		$('.card', _board).remove();
 		_player = null;
@@ -237,10 +245,10 @@ var Game = (function(){
 		var columns = $('#gameBoard .column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
-		deal();
+		deal(true);
 		return true;
 	}
-	
+
 	function appendColumn() {
 		var column = document.createElement("div");
 		var cardHolder;
@@ -254,7 +262,7 @@ var Game = (function(){
 		}
 		_board.appendChild(column);
 	}
-	
+
 	function calcHeight() {
 		var h1 = Math.floor($(_board).height() / 3) - 20;
 		var boardWidth = $(_board).width();
@@ -267,41 +275,37 @@ var Game = (function(){
 		}
 		return Math.min(h1, h2);
 	}
-	
+
 	function cardCss() {
 		var w = config.cardHeight / 3 * 2;
-		var r = Math.round(config.cardHeight / 10);
+		var r = Math.round(config.cardHeight * 0.06);
 		return {
 			'height': config.cardHeight + 'px',
 			'width': w + 'px',
 			'border-radius': r + 'px'
 		};
 	}
-	
+
 	function calcCardSize() {
 		var h = calcHeight();
 		if (h != config.cardHeight) {
-			config.cardHeight = h; 
+			config.cardHeight = h;
 			config.cardWidth = h / 3 * 2;
 		}
 	}
-	
+
     function init() {
 		_board = document.getElementById("gameBoard");
-		//window.console.log('screen height is' + window.screen.height);
-		//window.console.log('window height is' + window.innerHeight);
-		//window.console.log('board height is ' + $(_board).height());
 		var offset = $(_board).offset();
-		//window.console.log('board offset is ' + offset.top + ',' + offset.left);
 		boardPadding = offset.top;
 		calcCardSize();
-		
+
         var i;
 
         for (i = 0; i < config.columns; i++) {
 			appendColumn();
         }
-        
+
 		var MAX_VAL = 2;
 		// fill cards
 		var p = [0, 0, 0, 0];
@@ -310,10 +314,10 @@ var Game = (function(){
 		do {
 			_deck[cardIndex++] = new Card(p);
 		} while (nextCombination(p, MAX_VAL));
-		
+
 		_counter = document.getElementById('counter');
 		restart();
-		
+
 		// event handlers
 		_eventName = 'click';
 		if ('ontouchstart' in document.documentElement) {
@@ -323,18 +327,20 @@ var Game = (function(){
 		$(_board).on(_eventName, '.card', function() {
 			onCardSelect(this);
 		});
+
 		$(_board).on('dblclick', '.card', function(event) {
 			event.stopPropagation();
 			event.preventDefault();
 			return false;
 		});
-		
+
 		$('#setupDialog .button').on(_eventName, function() {
 			var count = parseInt(this.innerHTML);
 			hideDialog('#setupDialog');
 			createPlayers(count);
 			runSetup();
 		});
+
 		$('#setupDialog #keepScore')
 			.on(_eventName, function() {
 				var newval = !this.checked;
@@ -351,13 +357,13 @@ var Game = (function(){
 			$(_board).show();
 			resize();
 		});
-		
+
 		// create 1 player
 		createPlayers(1);
 		_players[0].area = createArea('player-bottom');
 		_players[0].layout = 'horizontal';
 		initPlayers();
-		
+
 		// hot-keys for debug
 		$(document).on('keyup', function(e){
 			// Ctrl+Q
@@ -365,14 +371,14 @@ var Game = (function(){
 				var set = findSet();
 				if (set != null) {
 					$(set).remove();
-					deal();
+					deal(true);
 					e.preventDefault();
 					e.stopPropagation();
 				}
 			}
 		});
     }
-	
+
 	function setup() {
 		showDialog('#setupDialog');
 		$(_board).hide();
@@ -417,11 +423,11 @@ var Game = (function(){
 					$('#gameMessage').hide();
 					initPlayers();
 				}
-				
+
 			}
 		});
 	}
-	
+
 	function createArea(playerClass) {
 		var area = $('<div class="player-area"></div>');
 		var contents = $('<div class="player-contents"></div');
@@ -438,13 +444,13 @@ var Game = (function(){
 		area.data('player', _setup.player);
 		return area;
 	}
-	
+
 	function initPlayers() {
 		$('.player-area').on(_eventName, function(){
 			// exit if not first :)
 			var clicked = $(this);
 			var clickedId = clicked.data('player');
-			
+
 			if (_player != null) {
 				if (_player.id != clickedId) {
 					_queue.push(_players[clickedId]);
@@ -452,25 +458,25 @@ var Game = (function(){
 				}
 				return;
 			}
-			
+
 			$('#gameMessage').hide();
 			_player = _players[clickedId];
 			clicked.addClass('clicked');
-			
+
 			// Queue
 			_queue = [];
-			
+
 			// Timer
 			startTimer(clicked);
 		});
 	}
-	
+
 	function startTimer(area) {
 		_countDown = config.maxTime + 1;
 		area.append('<div class="player-timer"></div>');
 		timerEvent();
 	}
-	
+
 	function timerEvent() {
 		_countDown--;
 		var percent = 100 * (config.maxTime - _countDown) / config.maxTime;
@@ -487,9 +493,9 @@ var Game = (function(){
 			playerFail();
 			cards().removeClass('hint selected');
 		}
-		
+
 	}
-	
+
 	function resizePlayers(playerClass) {
 		// find same class players
 		var same = $('.' + playerClass);
@@ -509,11 +515,13 @@ var Game = (function(){
 			});
 		}
 	}
+
 	function runSetup() {
 		_setup.player = 0;
 		_setup.next = true;
 		window.setTimeout(setupPlayer, 10);
 	}
+
 	function createPlayers(count) {
 		_players = [];
 		$('.player-area').remove();
@@ -534,11 +542,11 @@ var Game = (function(){
 			return;
 		}
 		*/
-			
+
 	}
 	function instruction (html, style, msec) {
 		var my = style || 'normal';
-		var delay = (typeof msec == "number")? msec : 0; 
+		var delay = (typeof msec == "number")? msec : 0;
 		var obj = $('#gameMessage');
 		obj.children().remove();
 		obj.html(html).attr('class', 'instruction ' + my).show();
@@ -559,12 +567,12 @@ var Game = (function(){
 			checkAttribute(c1.shape, c2.shape, c3.shape) &&
 			checkAttribute(c1.quantity, c2.quantity, c3.quantity);
 	}
-	
+
 	function checkAttribute(a1, a2, a3) {
-		return ((a1 == a2 && a2 == a3) || 
+		return ((a1 == a2 && a2 == a3) ||
 			(a1 != a2 && a1 != a3 && a2 != a3));
 	}
-	
+
 	function error(msg) {
 		document.getElementById('audio-error').play();
 		$('#errorMessage').parent().show();
@@ -572,7 +580,7 @@ var Game = (function(){
 				$('#errorMessage').parent().hide();
 			}, 1000);
 	};
-	
+
 	function cards() {
 		return $('.card', _board);
 	}
@@ -591,66 +599,66 @@ var Game = (function(){
 		}
 	}
 	function onCardSelect(card) {
-		
+
 		if (_players.length > 1 && _player == null) {
 			instruction('Select player first', 'error', 2000);
 			return;
 		}
-		
+
 		$(card).removeClass('hint').toggleClass('selected');
 		var selection = $('.card.selected', _board);
-		/*
-
-		 */
 		if (selection.length == 3) {
-			var check = [];
-			selection.each(function() { check.push(this) });
-			window.setTimeout(function() {
-				cards().removeClass('hint selected');
-			}, 100);
-			
 			if (_timer != null) {
 				window.clearTimeout(_timer);
 				_player.area.find('.player-timer').remove();
 			}
-			
-			if (checkSet(check)) {
-				// correct SET
-				selection.remove();
-				var columns = $('#gameBoard .column');
-				var movers = $('.column:last .card',_board);
-				var moveIndex = 0;
-				if (columns.length == config.maxColumns) {
-					$('.column',_board).not(':last').find('.cardHolder').each(function(){
-						if (!this.hasChildNodes()) {
-							var card = movers.eq(moveIndex++);
-							this.appendChild(card.get(0));
-						}
-					});
-					$('.column:last', _board).remove();
-				} else {
-					deal(true);
-				}
-				
-				playerWins();
-				
-			} else {
-				
-				// ERROR!
-				error("Oops!");
-				playerFail();
-			}
-
-
+			window.setTimeout(function(){
+				checkSelection();
+			}, 300);
 		}
 	};
-	
+	function checkSelection() {
+		var check = [];
+		var selection = $('.card.selected', _board);
+
+		selection.each(function() { check.push(this) });
+		cards().removeClass('hint selected');
+
+
+		if (checkSet(check)) {
+			// correct SET
+			selection.remove();
+			var columns = $('#gameBoard .column');
+			var movers = $('.column:last .card',_board);
+			var moveIndex = 0;
+			if (columns.length == config.maxColumns) {
+				$('.column',_board).not(':last').find('.cardHolder').each(function(){
+					if (!this.hasChildNodes()) {
+						var card = movers.eq(moveIndex++);
+						this.appendChild(card.get(0));
+					}
+				});
+				$('.column:last', _board).remove();
+			} else {
+				deal(true);
+			}
+
+			playerWins();
+
+		} else {
+
+			// ERROR!
+			error("Oops!");
+			playerFail();
+		}
+
+	}
 	function playerWins() {
 		if (_players.length < 2) {
 			_player = _players[0];
 		}
 		if (_player == null) return;
-		
+
 		_player.wins++;
 		var area = _player.area;
 		area.find('.win-counter').html(_player.wins);
@@ -658,11 +666,11 @@ var Game = (function(){
 		_player = null;
 		// Queue
 		if (_queue.length > 0) {
-			$('.player-area').removeClass('queue');	
+			$('.player-area').removeClass('queue');
 		}
 		_queue = [];
 	}
-	
+
 	function playerFail() {
 		if (_players.length < 2) {
 			_player = _players[0];
@@ -680,7 +688,7 @@ var Game = (function(){
 			startTimer(_player.area);
 		}
 	}
-	
+
 	function resize() {
 		var newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
@@ -720,7 +728,7 @@ function showTooltip(target, text, msec) {
 		left: pos.left - width
 	});
 	tt.fadeIn(200);
-	
+
 	window.setTimeout(function(){
 		tt.fadeOut(400);
 		}, msec);
@@ -738,7 +746,7 @@ function hideMessage() {
 	var top = '-' + m.css('height');
 	m.animate({"top": top}, 500);
 }
-function showDialog(id) {	
+function showDialog(id) {
 	var wh = window.innerHeight;
 	var ww = window.innerWidth;
 	var dlg = $(id);
@@ -763,29 +771,29 @@ $(document).ready(function(){
 
 	Game.init();
 
-	
+
 	$('#btnHint').on(eventName, function(){
 		Game.hint(this);
 		menuSwitch();
 	});
-	
+
 	$('#btnMore').on(eventName, function(){
 		Game.more();
 		menuSwitch();
 	});
-	
+
 	$('#btnStart').on(eventName, function(){
 		Game.restart();
 		menuSwitch();
 	});
-	
+
 	$('#menuSwitch').on(eventName, menuSwitch );
-	
+
 	$('#btnTest').on(eventName, function() {
-		
+
 		Game.setup();
-	});	
-		
+	});
+
 	$(window).on('resize', function(){
 		Game.resize();
 	});
