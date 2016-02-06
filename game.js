@@ -231,6 +231,7 @@ var Game = (function(){
 	}
 
 	function clear() {
+		clearTimers();
 		$('.card', _board).remove();
 		_player = null;
 		$('.player-area').removeClass('clicked');
@@ -477,6 +478,15 @@ var Game = (function(){
 		timerEvent();
 	}
 
+	function clearTimers() {
+		if (_timer != null) {
+			window.clearTimeout(_timer);
+			_timer = null;
+		}
+		$('.player-timer').remove();
+	}
+
+
 	function timerEvent() {
 		_countDown--;
 		var percent = 100 * (config.maxTime - _countDown) / config.maxTime;
@@ -608,11 +618,7 @@ var Game = (function(){
 		$(card).removeClass('hint').toggleClass('selected');
 		var selection = $('.card.selected', _board);
 		if (selection.length == 3) {
-			if (_timer != null) {
-				window.clearTimeout(_timer);
-				_timer = null;
-				_player.area.find('.player-timer').remove();
-			}
+			clearTimers();
 			window.setTimeout(function(){
 				checkSelection();
 			}, 300);
