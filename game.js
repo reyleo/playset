@@ -114,10 +114,15 @@ var Game = (function(){
 			var rem = _deck.length - _next;
 			_counter.innerHTML = "" + rem;
 		}
+		window.setTimeout(checkForMore, 10);
+    };
+	
+	function checkForMore() {
 		if (findSet() == null) {
 			addMore();
 		}
-    };
+	}
+	
 	/*
 	 * Get next card from deck and move pointer
 	 */
