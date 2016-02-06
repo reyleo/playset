@@ -15,13 +15,13 @@
 		padding-bottom: 36pt;
 		box-sizing: border-box;
 	}
-	
+
 	#gameBoard {
 		position: relative;
 		width: 100%;
 		height: 100%;
 		box-sizing: border-box;
-		background-color: #eeeded;		
+		background-color: #eeeded;
 		/* old setup
 		position: absolute;
 		width: 95%;
@@ -46,7 +46,7 @@
 		top: 0;
 		left: 0;
 		box-sizing: border-box;
-		border: 1px solid #EEE;
+		border: 1px solid #FFF;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 		text-align: center;
 		background-color: white;
@@ -55,7 +55,8 @@
 	.selected {
 		/*border-color: black;*/
 		/*background-color: lightgray;*/
-		box-shadow: 0 10px 20px rgba(0,0,0,0.19)
+		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
+		background-color: #999;
 	}
 	.hint {
 		background-color: #ec0;
@@ -78,15 +79,15 @@
 		position: absolute;
 		background-color: #fff;
 	}
-	.player-top .player-timer { 
+	.player-top .player-timer {
 		left: 0; top: 0; border-radius: 18pt 0 0 18pt; height: 36pt;}
-	.player-bottom .player-timer { 
+	.player-bottom .player-timer {
 		right: 0; top: 0; border-radius: 0 18pt 18pt 0; height: 36pt;}
-	.player-left .player-timer { 
+	.player-left .player-timer {
 		left: 0; bottom: 0; border-radius: 0 0 18pt 18pt; width: 36pt;}
-	.player-right .player-timer { 
+	.player-right .player-timer {
 		left: 0; top: 0; border-radius: 18pt 18pt 0 0; width: 36pt;}
-		
+
 	.player-contents div {
 		/*
 		position: absolute;
@@ -94,12 +95,12 @@
 		color: #222;
 		*/
 		float: left;
-		
+
 	}
 	.player-contents {
 		position: absolute;
 	}
-	
+
 	.player-top,
 	.player-bottom {
 		height: 36pt;
@@ -114,7 +115,7 @@
 	.player-bottom > .player-contents {
 		top: 0;
 		left: 0;
-	}	
+	}
 	.player-left > .player-contents {
 		top: 0;
 		left: 0;
@@ -127,7 +128,7 @@
 		right: 0;
 		top: 0;
 	}
-	
+
 	.player-left > .player-contents div {
 		transform: rotate(90deg);
 	}
@@ -138,7 +139,7 @@
 	.player-top > .player-contents div {
 		transform: rotate(180deg);
 	}
-	
+
 	.player-left {
 		left: 0;
 	}
@@ -179,7 +180,7 @@
 	.player-area.queue {
 		background-color: #faf884;
 	}
-	
+
 	#menuSwitch {
 		position: absolute;
 		top: 0;
@@ -202,10 +203,10 @@
 		display: none;
 		/*box-shadow: 1pt 1pt 0 1pt rgba(0, 0, 0, 0.2);*/
 		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
-		border-radius: 3px; 
+		border-radius: 3px;
 		z-index: 100;
 	}
-	
+
 	#controls .button {
 		width: 80%;
 		margin: 6pt 10% 0 10%;
@@ -218,9 +219,9 @@
 		cursor: pointer;
 		font-size: 20pt;
 	}
-	
+
 	#controls .button.error {
-		background-color: #c00; 
+		background-color: #c00;
 	}
 
 	#counter {
@@ -250,7 +251,7 @@
 	.red.filled {
 		fill: red;
 	}
-	
+
 	.purple.stripes {
 		fill: url(#purple-stripes);
 	}
@@ -284,7 +285,7 @@
 	.card .group {
 		width: 100%;
 	}
-	
+
 	#message {
 		width: 50%;
 		position: absolute;

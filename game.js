@@ -610,13 +610,15 @@ var Game = (function(){
 		if (selection.length == 3) {
 			if (_timer != null) {
 				window.clearTimeout(_timer);
+				_timer = null;
 				_player.area.find('.player-timer').remove();
 			}
 			window.setTimeout(function(){
 				checkSelection();
 			}, 300);
 		}
-	};
+	}
+
 	function checkSelection() {
 		var check = [];
 		var selection = $('.card.selected', _board);
@@ -653,6 +655,7 @@ var Game = (function(){
 		}
 
 	}
+
 	function playerWins() {
 		if (_players.length < 2) {
 			_player = _players[0];
@@ -667,8 +670,8 @@ var Game = (function(){
 		// Queue
 		if (_queue.length > 0) {
 			$('.player-area').removeClass('queue');
+            _queue = [];
 		}
-		_queue = [];
 	}
 
 	function playerFail() {
