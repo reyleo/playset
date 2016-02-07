@@ -50,13 +50,13 @@
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 		text-align: center;
 		background-color: white;
-		padding: 15% 10%; /*.9em .6em*/
+		padding: 12% 8%; /*.9em .6em*/
 	}
 	.selected {
 		/*border-color: black;*/
 		/*background-color: lightgray;*/
 		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
-		background-color: #999;
+		background-color: #AAA;
 	}
 	.hint {
 		background-color: #ec0;
@@ -303,3 +303,11 @@
 		text-align: center;
 		border-radius: 0 0 12pt 12pt;
 	}
+	.card svg {
+		width: 100%;
+	}
+	.card svg use {
+		width: 100%;
+	}
+	/* IE bug */
+	svg use { pointer-events:none; }
