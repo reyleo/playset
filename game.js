@@ -81,7 +81,7 @@ var Game = (function(){
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
 
-    var _debug = true;
+    var _debug = false;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
