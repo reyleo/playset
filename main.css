@@ -181,6 +181,11 @@
 		background-color: #faf884;
 	}
 
+	.player-area.winner {
+		background: #f8b500;
+	}
+
+
 	#menuSwitch {
 		position: absolute;
 		top: 0;

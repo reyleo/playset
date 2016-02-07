@@ -12,10 +12,10 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	outline: 0; 
+	outline: 0;
 	/*display: none;*/
 	background-color: #fff;
-	color: #222; 
+	color: #222;
 	border: 1px solid #EEE;
 	border-radius: 6pt;
 	box-shadow: 0 0 12pt 0 rgba(0, 0, 0, 0.4);
@@ -38,7 +38,7 @@
 	padding: 6pt 12pt;
 	text-overflow: ellipsis;
 	border-bottom: 1px solid #666;
-	font-size: 1.5em;	 	
+	font-size: 1.5em;
 }
 .dialog .close {
 	position: absolute;
@@ -88,7 +88,7 @@ svg.icon {
 	height: 22pt;
 	border: 1px solid #666;
 	background-color: #FFF;
-	
+
 	float: left;
 }
 .check-off {
@@ -106,7 +106,7 @@ svg.icon {
 	top: 40%;
 	background-color: #cc3300;
 	color: white;
-	font-size: 2em;	
+	font-size: 2em;
 	font-weight: bold;
 	font-family: sans-serif;
 	z-index: 101;
@@ -140,7 +140,7 @@ svg.icon {
 .tooltip-success {
 	color: #baed91;
 }
-  	
+
 .tooltip-error {
 	color: #fea3aa;
 }
@@ -150,7 +150,7 @@ svg.icon {
 	left: 100%;
 	top: 50%;
 	margin-top: -6pt;
-	width: 0; 
+	width: 0;
 	height: 0;
 	border-top: 6pt solid transparent;
 	border-bottom: 6pt solid transparent;
