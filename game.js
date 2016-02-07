@@ -1,4 +1,4 @@
-(function($){
+var _Game = (function($){
 
 function Card(p) {
     this.color = p[0];
@@ -55,6 +55,7 @@ Card.prototype.render = function() {
 var Game = (function(){
 
     var _board = null;
+    var _cardsLeft = 0;
     var _deck = [];
 	var _next = 0;
 	var _counter = null;
@@ -80,10 +81,17 @@ var Game = (function(){
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
 
+    var _debug = true;
+    var debug = function(str) {
+        if (_debug) {
+            window.console.log(str);
+        }
+    };
+
     function deal(animation) {
 		var animate = animation || false;
         var places = document.querySelectorAll('#gameBoard .cardHolder');
-		var elem, card;
+		var elem, card, count = 0;
 		for (var i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
 			if (elem == null) {
@@ -96,14 +104,14 @@ var Game = (function(){
 					elem.card = card;
 					card.dom = elem;
 					card.render();
-
+                    count++;
 					if (animate) {
 						//elem.style.display = 'none';
 						/*
 						$(elem).css('width', 0);
 						$(elem).animate({width: config.cardWidth + 'px'}, 500);
 						*/
-						$(elem).css('margin-left', '-25%');
+						$(elem).css('margin-right', '25%');
 						$(elem).css('opacity', 0);
 						$(elem).animate({'margin-left': 0, 'opacity': 1}, 400);
 
@@ -113,19 +121,52 @@ var Game = (function(){
 				}
 			}
 		}
+        _cardsLeft = _deck.length - _next;
+        debug("Added " + count + " cards, " + _cardsLeft + " left");
 		if (_counter) {
-			var rem = _deck.length - _next;
-			_counter.innerHTML = "" + rem;
+			_counter.innerHTML = "" + _cardsLeft;
 		}
-		window.setTimeout(checkForMore, 10);
     };
-	
+
 	function checkForMore() {
-		if (findSet() == null) {
-			addMore();
+        var setNotFound = findSet() == null;
+		if (setNotFound) {
+            debug("checkForMore: set not found, " + _cardsLeft + " cards left");
+            if (_cardsLeft > 0) {
+			    if (addMore()) {
+                    deal(true);
+                    setNotFound = findSet() == null;
+                }
+            }
 		}
+
+        if (setNotFound) {
+            gameOver();
+        }
 	}
-	
+
+    function gameOver() {
+        instruction("Game over!", 'normal', 2000);
+        var winners = [];
+        var maxPoints = -999;
+        var player, points, i;
+        for (i = 0; i < _players.length; i++) {
+            player = _players[i];
+            points = player.wins - player.fails;
+            if (points == maxPoints) {
+                winners.push(player);
+            } else if (points > maxPoints) {
+                winners = [];
+                winners.push(player);
+                maxPoints = points;
+            }
+        }
+        debug("Max points " + maxPoints + ", winners = " + winners.length);
+        for (i = 0; i < winners.length; i++) {
+            winners[i].area.addClass('winner');
+        }
+
+    }
 	/*
 	 * Get next card from deck and move pointer
 	 */
@@ -166,6 +207,7 @@ var Game = (function(){
 				selection.push(cards.get(combination[j]));
 			}
 			if (checkSet(selection)) {
+                debug("findSet - set found in " + cards.length + " cards");
 				return selection;
 			}
 
@@ -189,7 +231,7 @@ var Game = (function(){
 
 
 		} while (true);
-
+        debug("findSet - not found in " + cards.length + " cards");
 		return null;
 	}
 
@@ -223,6 +265,7 @@ var Game = (function(){
 		clear();
 		shuffle();
 		deal();
+        checkForMore();
 		if (!config.keepScore) {
 			resetScore();
 		}
@@ -242,7 +285,7 @@ var Game = (function(){
 		clearTimers();
 		$('.card', _board).remove();
 		_player = null;
-		$('.player-area').removeClass('clicked');
+		$('.player-area').removeClass('clicked winner');
 		$('#gameBoard .column').each(function(index){
 			if (index > config.columns-1) {
 				$(this).remove();
@@ -250,11 +293,16 @@ var Game = (function(){
 		});
 	}
 
+    function commandMore() {
+        addMore();
+        deal(true);
+    }
+
 	function addMore() {
 		var columns = $('#gameBoard .column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
-		deal(true);
+        debug("1 column added")
 		return true;
 	}
 
@@ -372,20 +420,7 @@ var Game = (function(){
 		_players[0].layout = 'horizontal';
 		initPlayers();
 
-		// hot-keys for debug
-		$(document).on('keyup', function(e){
-			// Ctrl+Q
-			if (e.which == 81 && e.ctrlKey) {
-				var set = findSet();
-				if (set != null) {
-					$(set).remove();
-					deal(true);
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			}
-		});
-		
+
 
     }
 
@@ -605,7 +640,7 @@ var Game = (function(){
 	}
 	function hint(btn) {
 		var set = findSet();
-		var showSet = false;
+		var showSet = true;
 		if (showSet) cards().removeClass('hint selected');
 		if (set) {
 			instruction('Set exists!', 'green', 2000);
@@ -656,11 +691,15 @@ var Game = (function(){
 					}
 				});
 				$('.column:last', _board).remove();
+                debug("1 column removed");
 			} else {
 				deal(true);
 			}
+            playerWins();
 
-			playerWins();
+            // Check if we need more cards
+            checkForMore();
+
 
 		} else {
 
@@ -670,6 +709,22 @@ var Game = (function(){
 		}
 
 	}
+    function autoPlay() {
+        var set;
+
+        set = findSet();
+        if (set != null) {
+            $(set).addClass('selected');
+
+            // select random player
+            var max = _players.length;
+            var index = Math.floor(Math.random() * max);
+            _player = _players[index];
+            checkSelection();
+            window.setTimeout(autoPlay, 500);
+        }
+        return true;
+    }
 
 	function playerWins() {
 		if (_players.length < 2) {
@@ -723,12 +778,12 @@ var Game = (function(){
 	}
     return {
         init: init,
-		onCardSelect: onCardSelect,
 		hint: hint,
-		more: addMore,
+		more: commandMore,
 		restart: restart,
 		setup: setup,
-		resize: resize
+		resize: resize,
+        autoPlay: autoPlay
     };
 })();
 function showTooltip(target, text, msec) {
@@ -789,11 +844,11 @@ $(document).ready(function(){
 
 	/*
 	 *   Delayed render fixes issue on Firefox
-	 */ 
+	 */
 	window.setTimeout(function(){
-		Game.init();	
+		Game.init();
 	}, 10);
-	
+
 
 
 	$('#btnHint').on(eventName, function(){
@@ -828,5 +883,5 @@ function menuSwitch() {
 	if (menu.is(':visible')) menu.hide(300);
 	else menu.show(300);
 }
-
+return Game;
 })(window.jQuery);
