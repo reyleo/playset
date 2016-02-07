@@ -13,6 +13,7 @@ Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 }
 var svgNS = "http://www.w3.org/2000/svg";
+var xlinkNS = "http://www.w3.org/1999/xlink";
 Card.prototype._shapes = ["pill", "curve", "rhomb"];
 Card.prototype._colors = ["red", "green", "purple"];
 Card.prototype._fills = ["empty", "filled", "stripes"];
@@ -30,14 +31,16 @@ Card.prototype.render = function() {
 			svg = document.createElementNS(svgNS, "svg");
 			svg.setAttribute('class', "symbol");
 			svg.setAttribute('viewBox','0 0 200 100');
-			svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+			svg.style.width = "100%";
+			//svg.setAttributeNS("http://www.w3.org/2000/xmlns", "xlink", "http://www.w3.org/1999/xlink");
 
 			symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
+			symbol.removeAttribute('id');
 			/*
 			symbol = document.createElementNS(svgNS, "use");
 			symbol.setAttribute('x', '0');
 			symbol.setAttribute('y', '0');
-			symbol.setAttribute('xlink:href', this._shapes[this.shape]);
+			symbol.setAttributeNS(xlinkNS, 'href', "#" + this._shapes[this.shape]);
 			*/
 			symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
 
@@ -89,10 +92,10 @@ var Game = (function(){
 					elem = document.createElement('div');
 					elem.className = 'card';
 					$(elem).css(cardCss());
+					places[i].appendChild(elem);
 					elem.card = card;
 					card.dom = elem;
 					card.render();
-					places[i].appendChild(elem);
 
 					if (animate) {
 						//elem.style.display = 'none';
@@ -259,7 +262,7 @@ var Game = (function(){
 		var column = document.createElement("div");
 		var cardHolder;
 		column.className = "column";
-		column.style.width = Math.floor(config.cardWidth) + 'px';
+		column.style.width = config.cardWidth + 'px';
 		for (var j = 0; j < config.rows; j++) {
 			cardHolder = document.createElement("div");
 			cardHolder.className = "cardHolder";
@@ -307,7 +310,6 @@ var Game = (function(){
 		calcCardSize();
 
         var i;
-
         for (i = 0; i < config.columns; i++) {
 			appendColumn();
         }
@@ -383,6 +385,8 @@ var Game = (function(){
 				}
 			}
 		});
+		
+
     }
 
 	function setup() {
@@ -783,7 +787,13 @@ $(document).ready(function(){
 		eventName = 'touchstart';
 	}
 
-	Game.init();
+	/*
+	 *   Delayed render fixes issue on Firefox
+	 */ 
+	window.setTimeout(function(){
+		Game.init();	
+	}, 10);
+	
 
 
 	$('#btnHint').on(eventName, function(){
