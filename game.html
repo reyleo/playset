@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html manifest="playset.manifest">
 	<meta charset="utf-8">
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <head>
     <title>Play Set Game</title>
@@ -10,7 +10,7 @@
 	<link href="widgets.css" rel="stylesheet" type="text/css"/>
 	<link href="main.css" rel="stylesheet" type="text/css"/>
 	<!--<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed&subset=latin,cyrillic' rel='stylesheet' type='text/css'>-->
-	
+
 <style>
 </style>
 </head>
@@ -50,19 +50,19 @@
 					c1.563-11.004,5.132-20.059,8.793-29.019c4.601-11.257,9.901-26.929,5.716-42.648c-1.685-6.332-6.212-14.777-8.792-18.906
 					C10.757,38.272,3.854,30,4.65,22.96C5.614,14.428,16.797,10.649,24.435,9.77z"/>
 			-->
-			<symbol id="pill" viewBox="0 0 200 100"> 
+			<symbol id="pill" viewBox="0 0 200 100">
 				<rect  x="10" y="10" width="180" height="80" rx="40" ry="40"/>
 			</symbol>
 			<symbol id="icon-cross" viewBox="0 0 400 400">
-				<polygon points="341.921,87.363 313.637,59.079 200.5,172.216 87.363,59.079 59.079,87.363 172.216,200.5 
-					59.079,313.637 87.364,341.921 200.5,228.784 313.637,341.921 341.921,313.637 228.785,200.5 "/>				
+				<polygon points="341.921,87.363 313.637,59.079 200.5,172.216 87.363,59.079 59.079,87.363 172.216,200.5
+					59.079,313.637 87.364,341.921 200.5,228.784 313.637,341.921 341.921,313.637 228.785,200.5 "/>
 			</symbol>
 			<symbol id="icon-check" viewBox="0 0 400 400">
-				<polygon points="156.432,320.208 128.147,291.924 57.437,221.213 85.721,192.929 156.432,263.64 340.279,79.792 
-					368.563,108.076 "/>				
+				<polygon points="156.432,320.208 128.147,291.924 57.437,221.213 85.721,192.929 156.432,263.64 340.279,79.792
+					368.563,108.076 "/>
 			</symbol>
 		</defs>
-		
+
 		<use x="0" y="0" xlink:href="#curve" id="symbol-curve"/>
 		<use x="0" y="0" xlink:href="#pill" id="symbol-pill"/>
 		<use x="0" y="0" xlink:href="#rhomb" id="symbol-rhomb"/>
@@ -80,9 +80,10 @@
 			<div class="button" id="btnMore" title="More">+3</div>
 			<div class="button" id="btnStart" title="Start" style="background-color:#993300">Restart</div>
 			<div class="button" id="btnTest" title="More">Setup</div>
+			<div id="gameInfo">Version</div>
 		</div>
 	</div>
-		
+
 
 
 <div class="overlay" style="display:none">

@@ -166,11 +166,11 @@
 	}
 	.player-area .fail-counter {
 		/*background-color: #111;*/
-		background: linear-gradient(to bottom, #444 0%,#111 100%);
+		background: #111;
 		color: #fff;
 	}
 	.player-area .win-counter {
-		background: linear-gradient(to bottom, #f8f8f8 0%,#e8e8e8 100%);
+		background: #f8f8f8;
 		/*background-color: #fff;*/
 		color: #111;
 	}
@@ -316,3 +316,9 @@
 	}
 	/* IE bug */
 	svg use { pointer-events:none; }
+
+	#gameInfo {
+		text-align: center;
+		color: #777;
+		font-size: .6em;
+	}

@@ -1,5 +1,7 @@
 var _Game = (function($){
 
+var version = "0.033";
+
 function Card(p) {
     this.color = p[0];
     this.shape = p[1];
@@ -70,6 +72,7 @@ var Game = (function(){
 		next: false
 	};
 	var _eventName = "";
+    var _selectionDone = false;
 	var config = {
 		rows: 3,
 		columns: 4,
@@ -78,6 +81,7 @@ var Game = (function(){
 		cardWidth: 300,
 		keepScore: true,
 		maxTime: 10,
+        showSetOnHint: false,
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
 
@@ -92,6 +96,7 @@ var Game = (function(){
 		var animate = animation || false;
         var places = document.querySelectorAll('#gameBoard .cardHolder');
 		var elem, card, count = 0;
+
 		for (var i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
 			if (elem == null) {
@@ -353,6 +358,9 @@ var Game = (function(){
 
     function init() {
 		_board = document.getElementById("gameBoard");
+
+        $('#gameInfo').html(version);
+
 		var offset = $(_board).offset();
 		boardPadding = offset.top;
 		calcCardSize();
@@ -419,9 +427,6 @@ var Game = (function(){
 		_players[0].area = createArea('player-bottom');
 		_players[0].layout = 'horizontal';
 		initPlayers();
-
-
-
     }
 
 	function setup() {
@@ -640,12 +645,12 @@ var Game = (function(){
 	}
 	function hint(btn) {
 		var set = findSet();
-		var showSet = true;
-		if (showSet) cards().removeClass('hint selected');
+
+		if (config.showSetOnHint) cards().removeClass('hint selected');
 		if (set) {
 			instruction('Set exists!', 'green', 2000);
 			//showTooltip($(btn), 'Set exists!', 2000);
-			if (showSet) $(set).addClass('hint');
+			if (config.showSetOnHint) $(set).addClass('hint');
 		} else {
 			instruction('Not found!', 'error', 2000);
 			//showMessage('No set found', 1000);
@@ -653,7 +658,7 @@ var Game = (function(){
 		}
 	}
 	function onCardSelect(card) {
-
+        if (_selectionDone) return;
 		if (_players.length > 1 && _player == null) {
 			instruction('Select player first', 'error', 2000);
 			return;
@@ -662,6 +667,7 @@ var Game = (function(){
 		$(card).removeClass('hint').toggleClass('selected');
 		var selection = $('.card.selected', _board);
 		if (selection.length == 3) {
+            _selectionDone = true;
 			clearTimers();
 			window.setTimeout(function(){
 				checkSelection();
@@ -675,7 +681,7 @@ var Game = (function(){
 
 		selection.each(function() { check.push(this) });
 		cards().removeClass('hint selected');
-
+        _selectionDone = false;
 
 		if (checkSet(check)) {
 			// correct SET
@@ -835,7 +841,18 @@ function showDialog(id) {
 function hideDialog(id) {
 	$('#setupDialog').parent().hide();
 }
+function updateReady() {
+    alert("Update available!");
+    window.applicationCache.update();
+    window.applicationCache.swapCache();
+    alert("Version " + version + " installed");
+}
+
 $(document).ready(function(){
+
+    if (window.applicationCache) {
+        window.applicationCache.addEventListener('updateready', updateReady, false);
+    }
 
 	var eventName = 'click';
 	if ('ontouchstart' in document.documentElement) {
