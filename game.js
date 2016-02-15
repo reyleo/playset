@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.033";
+var version = "0.040";
 
 function Card(p) {
     this.color = p[0];
@@ -116,7 +116,7 @@ var Game = (function(){
 						$(elem).css('width', 0);
 						$(elem).animate({width: config.cardWidth + 'px'}, 500);
 						*/
-						$(elem).css('margin-right', '25%');
+						$(elem).css('margin-left', '-25%');
 						$(elem).css('opacity', 0);
 						$(elem).animate({'margin-left': 0, 'opacity': 1}, 400);
 
@@ -842,17 +842,18 @@ function hideDialog(id) {
 	$('#setupDialog').parent().hide();
 }
 function updateReady() {
-    alert("Update available!");
+    //alert("Update available!");
     window.applicationCache.update();
     window.applicationCache.swapCache();
     alert("Version " + version + " installed");
 }
 
 $(document).ready(function(){
-
+    /*
     if (window.applicationCache) {
         window.applicationCache.addEventListener('updateready', updateReady, false);
     }
+    */
 
 	var eventName = 'click';
 	if ('ontouchstart' in document.documentElement) {
