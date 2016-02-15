@@ -250,23 +250,14 @@
 	.empty {
 		fill: white;
 	}
-	.red.stripes {
-		fill: url(#red-stripes);
-	}
 	.red.filled {
 		fill: red;
 	}
 
-	.purple.stripes {
-		fill: url(#purple-stripes);
-	}
 	.purple.filled {
 		fill: purple;
 	}
 
-	.green.stripes {
-		fill: url(#green-stripes);
-	}
 	.green.filled {
 		fill: green;
 	}
