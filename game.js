@@ -380,7 +380,30 @@ var Game = (function(){
 		resizePlayers('player-left');
 
 	}
-
+	
+	function maximize(on) {
+		if (_players.length > 1) return;
+		var property = 'padding-' + _players[0].position;
+		var defaultPadding = '36pt'; 
+		var padding = defaultPadding;
+		if (on) {
+			padding = '0';
+		}
+		var css = {
+			'padding-top':    padding, 
+			'padding-right':  padding,
+			'padding-bottom': padding,
+			'padding-left':   padding
+		};
+		if (on) {
+			css[property] = defaultPadding;
+			css['padding-top'] = defaultPadding;
+		}
+		
+		$('#gameContainer').css(css);
+		resize();
+	}
+	
     function init() {
 		_board = document.getElementById("gameBoard");
 
@@ -451,6 +474,8 @@ var Game = (function(){
 		createPlayers(1);
 		_players[0].area = createArea('player-bottom');
 		_players[0].layout = 'horizontal';
+		_players[0].class = "player-bottom";
+		_players[0].position = "bottom";
 		initPlayers();
     }
 
@@ -472,15 +497,19 @@ var Game = (function(){
 			if (clickY < boardPadding) {
 				playerClass = 'player-top';
 				player.layout = 'horizontal';
+				player.position = 'top';
 			} else if (clickY > (wh - boardPadding)) {
 				playerClass = 'player-bottom';
 				player.layout = 'horizontal';
+				player.position = 'bottom';
 			} else if (clickX < boardPadding) {
 				playerClass = 'player-left';
 				player.layout = 'vertical';
+				player.position = 'left';
 			} else if (clickX > (ww - boardPadding)) {
 				playerClass = 'player-right';
 				player.layout = 'vertical';
+				player.position = 'right';
 			} else {
 				area = null;
 				window.setTimeout(setupPlayer, 1000);
@@ -617,6 +646,7 @@ var Game = (function(){
 				fails: 0,
 				layout: '',
 				class: '',
+				position: '',
 				area: null
 			});
 		}
@@ -800,7 +830,8 @@ var Game = (function(){
 		restart: restart,
 		setup: setup,
 		resize: resize,
-        autoPlay: autoPlay
+        autoPlay: autoPlay,
+		maximize: maximize
     };
 })();
 function showTooltip(target, text, msec) {
@@ -897,11 +928,22 @@ $(document).ready(function(){
 
 	$('#menuSwitch').on(eventName, menuSwitch );
 
-	$('#btnTest').on(eventName, function() {
-
+	$('#btnSetup').on(eventName, function() {
 		Game.setup();
 	});
-
+	
+	$('#btnMax').on(eventName, function() {
+		var on = $(this).data('on');
+		if (typeof on === 'undefined') { 
+			on = true;
+		} else {
+			on = !on;
+		}
+		Game.maximize(on);
+		$(this).data('on', on);
+		menuSwitch();
+	});
+	
 	$(window).on('resize', function(){
 		Game.resize();
 	});
