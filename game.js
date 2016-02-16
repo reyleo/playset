@@ -85,7 +85,7 @@ var Game = (function(){
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
 
-    var _debug = false;
+    var _debug = true;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
@@ -319,14 +319,14 @@ var Game = (function(){
 		for (var j = 0; j < config.rows; j++) {
 			cardHolder = document.createElement("div");
 			cardHolder.className = "cardHolder";
-			cardHolder.style.height = config.cardHeight + 'px';
+			$(cardHolder).css(cardHolderCss());
 			column.appendChild(cardHolder);
 		}
 		_board.appendChild(column);
 	}
 
 	function calcHeight() {
-		var h1 = Math.floor($(_board).height() / 3) - 20;
+		var h1 = Math.floor($(_board).height() * 0.9 / 3);
 		var boardWidth = $(_board).width();
 		var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
@@ -338,12 +338,22 @@ var Game = (function(){
 		return Math.min(h1, h2);
 	}
 
+	function cardHolderCss() {
+		var margin = Math.floor(config.cardHeight * 0.075);
+		var totalHeight = config.cardHeight * 3 + margin * 4;
+		debug("Card height=" + config.cardHeight + ', margin = ' + margin + ", Total height = " + totalHeight);
+		return {
+			'height': config.cardHeight,
+			'margin-top': margin,
+			'margin-bottom': margin
+		};
+	}
+
 	function cardCss() {
-		var w = config.cardHeight / 3 * 2;
 		var r = Math.round(config.cardHeight * 0.06);
 		return {
 			'height': config.cardHeight + 'px',
-			'width': w + 'px',
+			'width': config.cardWidth + 'px',
 			'border-radius': r + 'px'
 		};
 	}
@@ -354,6 +364,21 @@ var Game = (function(){
 			config.cardHeight = h;
 			config.cardWidth = h / 3 * 2;
 		}
+	}
+
+	function resize() {
+		var newHeight = calcHeight();
+		if (config.cardHeight != newHeight) {
+			calcCardSize();
+			$('.card', _board).css(cardCss());
+			$('.cardHolder', _board).css(cardHolderCss());
+			$('.column', _board).width(config.cardWidth);
+		}
+		resizePlayers('player-top');
+		resizePlayers('player-bottom');
+		resizePlayers('player-right');
+		resizePlayers('player-left');
+
 	}
 
     function init() {
@@ -414,7 +439,7 @@ var Game = (function(){
 			})
 			.addClass(config.keepScore ? 'check-on' : 'check-off')
 			.prop('checked', config.keepScore)
-			;
+			
 
 		$('#setupDialog .close').on(_eventName, function() {
 			hideDialog('#setupDialog');
@@ -768,20 +793,6 @@ var Game = (function(){
 		}
 	}
 
-	function resize() {
-		var newHeight = calcHeight();
-		if (config.cardHeight != newHeight) {
-			calcCardSize();
-			$('.card', _board).css(cardCss());
-			$('.cardHolder', _board).css({height: config.cardHeight});
-			$('.column', _board).width(config.cardWidth);
-		}
-		resizePlayers('player-top');
-		resizePlayers('player-bottom');
-		resizePlayers('player-right');
-		resizePlayers('player-left');
-
-	}
     return {
         init: init,
 		hint: hint,
