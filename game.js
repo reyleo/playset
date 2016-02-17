@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.041";
+var version = "0.046";
 
 function Card(p) {
     this.color = p[0];
@@ -85,7 +85,7 @@ var Game = (function(){
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
 	};
 
-    var _debug = true;
+    var _debug = false;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
@@ -380,17 +380,17 @@ var Game = (function(){
 		resizePlayers('player-left');
 
 	}
-	
+
 	function maximize(on) {
 		if (_players.length > 1) return;
 		var property = 'padding-' + _players[0].position;
-		var defaultPadding = '36pt'; 
+		var defaultPadding = '36pt';
 		var padding = defaultPadding;
 		if (on) {
 			padding = '0';
 		}
 		var css = {
-			'padding-top':    padding, 
+			'padding-top':    padding,
 			'padding-right':  padding,
 			'padding-bottom': padding,
 			'padding-left':   padding
@@ -399,11 +399,11 @@ var Game = (function(){
 			css[property] = defaultPadding;
 			css['padding-top'] = defaultPadding;
 		}
-		
+
 		$('#gameContainer').css(css);
 		resize();
 	}
-	
+
     function init() {
 		_board = document.getElementById("gameBoard");
 
@@ -428,7 +428,6 @@ var Game = (function(){
 		} while (nextCombination(p, MAX_VAL));
 
 		_counter = document.getElementById('counter');
-		restart();
 
 		// event handlers
 		_eventName = 'click';
@@ -462,7 +461,7 @@ var Game = (function(){
 			})
 			.addClass(config.keepScore ? 'check-on' : 'check-off')
 			.prop('checked', config.keepScore)
-			
+
 
 		$('#setupDialog .close').on(_eventName, function() {
 			hideDialog('#setupDialog');
@@ -477,6 +476,9 @@ var Game = (function(){
 		_players[0].class = "player-bottom";
 		_players[0].position = "bottom";
 		initPlayers();
+
+        // finally restart game
+        restart();
     }
 
 	function setup() {
@@ -523,14 +525,19 @@ var Game = (function(){
 					_setup.player++;
 					window.setTimeout(setupPlayer, 10);
 				} else {
-					$(_board).show();
-					$('#gameMessage').hide();
-					initPlayers();
+                    finishSetup();
 				}
 
 			}
 		});
 	}
+
+    function finishSetup() {
+        $(_board).show();
+        $('#gameMessage').hide();
+        initPlayers();
+        restart();
+    }
 
 	function createArea(playerClass) {
 		var area = $('<div class="player-area"></div>');
@@ -884,18 +891,19 @@ function hideDialog(id) {
 	$('#setupDialog').parent().hide();
 }
 function updateReady() {
-    //alert("Update available!");
-    window.applicationCache.update();
-    window.applicationCache.swapCache();
-    alert("Version " + version + " installed");
+    alert("Update available!");
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+        window.location.reload();
+    }
+    //alert("Version " + version + " installed");
 }
 
 $(document).ready(function(){
-    /*
+
     if (window.applicationCache) {
         window.applicationCache.addEventListener('updateready', updateReady, false);
     }
-    */
+
 
 	var eventName = 'click';
 	if ('ontouchstart' in document.documentElement) {
@@ -931,10 +939,10 @@ $(document).ready(function(){
 	$('#btnSetup').on(eventName, function() {
 		Game.setup();
 	});
-	
+
 	$('#btnMax').on(eventName, function() {
 		var on = $(this).data('on');
-		if (typeof on === 'undefined') { 
+		if (typeof on === 'undefined') {
 			on = true;
 		} else {
 			on = !on;
@@ -943,7 +951,7 @@ $(document).ready(function(){
 		$(this).data('on', on);
 		menuSwitch();
 	});
-	
+
 	$(window).on('resize', function(){
 		Game.resize();
 	});
