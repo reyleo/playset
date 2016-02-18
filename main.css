@@ -49,6 +49,31 @@
 		background-color: white;
 		padding: 12% 8%; /*.9em .6em*/
 	}
+	.card.animate {
+		animation: card-slide 400ms ease-out;
+		-webkit-animation: card-slide 400ms ease-out;
+	}
+	@keyframes card-slide {
+		0% {
+			margin-left: -25%;
+			opacity: 0;
+		}
+		100% {
+			margin-left: 0;
+			opacity: 1;
+		}
+	}
+	@-webkit-keyframes card-slide {
+		0% {
+			margin-left: -25%;
+			opacity: 0;
+		}
+		100% {
+			margin-left: 0;
+			opacity: 1;
+		}
+	}
+	
 	.selected {
 		/*border-color: black;*/
 		/*background-color: lightgray;*/

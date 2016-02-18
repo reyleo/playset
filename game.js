@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.046";
+var version = "0.047";
 
 function Card(p) {
     this.color = p[0];
@@ -105,22 +105,16 @@ var Game = (function(){
 					elem = document.createElement('div');
 					elem.className = 'card';
 					$(elem).css(cardCss());
-					places[i].appendChild(elem);
 					elem.card = card;
 					card.dom = elem;
 					card.render();
                     count++;
 					if (animate) {
-						//elem.style.display = 'none';
-						/*
-						$(elem).css('width', 0);
-						$(elem).animate({width: config.cardWidth + 'px'}, 500);
-						*/
-						$(elem).css('margin-left', '-25%');
-						$(elem).css('opacity', 0);
-						$(elem).animate({'margin-left': 0, 'opacity': 1}, 400);
-
+						$(elem).addClass('animate')
 					}
+					
+					places[i].appendChild(elem);
+
 				} else {
 					break;
 				}
