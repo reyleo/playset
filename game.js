@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.047";
+var version = "0.048";
 
 function Card(p) {
     this.color = p[0];
@@ -79,7 +79,7 @@ var Game = (function(){
 		maxColumns: 5,
 		cardHeight: 200,
 		cardWidth: 300,
-		keepScore: true,
+		keepScore: false,
 		maxTime: 10,
         showSetOnHint: false,
 		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
@@ -454,7 +454,7 @@ var Game = (function(){
 				this.className = "check " + (this.checked ? 'check-on' : 'check-off');
 			})
 			.addClass(config.keepScore ? 'check-on' : 'check-off')
-			.prop('checked', config.keepScore)
+			.prop('checked', config.keepScore);
 
 
 		$('#setupDialog .close').on(_eventName, function() {
@@ -477,6 +477,8 @@ var Game = (function(){
 
 	function setup() {
 		showDialog('#setupDialog');
+		// do not repeat animation
+		cards().removeClass('animate');
 		$(_board).hide();
 		menuSwitch();
 	}
