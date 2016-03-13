@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.048";
+var version = "0.056";
 
 function Card(p) {
     this.color = p[0];
@@ -53,6 +53,7 @@ Card.prototype.render = function() {
 		this.dom.appendChild(group);
 	}
 };
+var Status = {active: 0, pause: 1, over: 2};
 
 var Game = (function(){
 
@@ -71,6 +72,7 @@ var Game = (function(){
 		player: 0,
 		next: false
 	};
+	var _status = Status.over;
 	var _eventName = "";
     var _selectionDone = false;
 	var config = {
@@ -164,7 +166,7 @@ var Game = (function(){
         for (i = 0; i < winners.length; i++) {
             winners[i].area.addClass('winner');
         }
-
+		_status = Status.over;
     }
 	/*
 	 * Get next card from deck and move pointer
@@ -261,6 +263,7 @@ var Game = (function(){
 
 	function restart() {
 		_next = 0;
+		_status = Status.active;
 		clear();
 		shuffle();
 		deal();
@@ -553,7 +556,9 @@ var Game = (function(){
 	}
 
 	function initPlayers() {
-		$('.player-area').on(_eventName, function(){
+		$('.player-area').on(_eventName, function() {
+			// do not react on user click if game is over
+			if (_status == Status.over) return;
 			// exit if not first :)
 			var clicked = $(this);
 			var clickedId = clicked.data('player');
