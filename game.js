@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.056";
+var version = "0.057";
 
 function Card(p) {
     this.color = p[0];
@@ -95,6 +95,8 @@ var Game = (function(){
     };
 
     function deal(animation) {
+    	if (_cardsLeft === 0) return;
+
 		var animate = animation || false;
         var places = document.querySelectorAll('#gameBoard .cardHolder');
 		var elem, card, count = 0;
@@ -130,7 +132,7 @@ var Game = (function(){
     };
 
 	function checkForMore() {
-        var setNotFound = findSet() == null;
+        var setNotFound = (findSet() == null);
 		if (setNotFound) {
             debug("checkForMore: set not found, " + _cardsLeft + " cards left");
             if (_cardsLeft > 0) {
@@ -195,6 +197,9 @@ var Game = (function(){
 
 	function findSet() {
 		var cards = $('#gameBoard .card');
+		// is board empty?
+		if (cards.length == 0) return null;
+
 		var combination = [0, 1, 2];
 		var selection;
 		var j, k, m, max = cards.length - 1;
