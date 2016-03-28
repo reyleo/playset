@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.057";
+var version = "0.058";
 
 function Card(p) {
     this.color = p[0];
@@ -95,7 +95,6 @@ var Game = (function(){
     };
 
     function deal(animation) {
-    	if (_cardsLeft === 0) return;
 
 		var animate = animation || false;
         var places = document.querySelectorAll('#gameBoard .cardHolder');
@@ -268,6 +267,7 @@ var Game = (function(){
 
 	function restart() {
 		_next = 0;
+		_cardsLeft = _deck.length;
 		_status = Status.active;
 		clear();
 		shuffle();
