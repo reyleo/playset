@@ -126,12 +126,12 @@
 	.player-top,
 	.player-bottom {
 		height: 36pt;
-		min-width: 120pt;
+		min-width: 72pt;
 	}
 	.player-right,
 	.player-left {
 		width: 36pt;
-		min-height: 120pt;
+		min-height: 72pt;
 	}
 
 	.player-bottom > .player-contents {
@@ -207,17 +207,23 @@
 		background: #f8b500;
 	}
 
-
-	#menuSwitch {
+	.corner-button {
 		position: absolute;
-		top: 0;
-		right: 0;
 		width: 36pt;
 		height: 36pt;
-		/*background-color: #333;*/
 		box-sizing: border-box;
 		fill: #333;
 		z-index: 100;
+		padding: 6pt;
+		cursor: pointer;
+	}
+	#menuSwitch {
+		top: 0;
+		right: 0;
+	}
+	#maximizeBtn {
+		top: 0;
+		left: 0;
 	}
 	#controls {
 		position: absolute;
@@ -225,7 +231,7 @@
 		right: 36pt;
 		width: 200pt;
 		/*height: 50%;*/
-		padding-bottom: 12pt;
+		padding: 12pt;
 		background-color: #333;
 		display: none;
 		/*box-shadow: 1pt 1pt 0 1pt rgba(0, 0, 0, 0.2);*/
@@ -235,8 +241,8 @@
 	}
 
 	#controls .button {
-		width: 80%;
-		margin: 6pt 10% 0 10%;
+		width: 100%;
+		margin: 0;
 		background-color: #666;
 		border-radius: 3pt;
 		padding: 6pt;
@@ -246,7 +252,9 @@
 		cursor: pointer;
 		font-size: 20pt;
 	}
-
+	#controls .button:nth-child(n+2) {
+		margin-top: 6pt;
+	}
 	#controls .button.error {
 		background-color: #c00;
 	}

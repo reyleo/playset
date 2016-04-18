@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.058";
+var version = "0.065";
 
 function Card(p) {
     this.color = p[0];
@@ -68,6 +68,7 @@ var Game = (function(){
 	var _queue = [];
 	var _timer = null;
 	var _countDown;
+	var _maximized = false;
 	var _setup = {
 		player: 0,
 		next: false
@@ -384,10 +385,11 @@ var Game = (function(){
 	}
 
 	function maximize(on) {
-		if (_players.length > 1) return;
+		var on = (typeof on === 'undefined') ? !_maximized : on;
 		var property = 'padding-' + _players[0].position;
 		var defaultPadding = '36pt';
 		var padding = defaultPadding;
+
 		if (on) {
 			padding = '0';
 		}
@@ -402,8 +404,10 @@ var Game = (function(){
 			css['padding-top'] = defaultPadding;
 		}
 
+		_maximized = on;
 		$('#gameContainer').css(css);
-		resize();
+		resize();	
+		
 	}
 
     function init() {
@@ -537,7 +541,17 @@ var Game = (function(){
 	}
 
     function finishSetup() {
-        $(_board).show();
+		$(_board).show();
+		
+		if (_players.length > 1) {
+			if (_maximized) {
+				maximize(false);
+			}
+			$('#maximizeBtn').hide();
+		} else {
+			$('#maximizeBtn').show();
+		}
+		
         $('#gameMessage').hide();
         initPlayers();
         restart();
@@ -628,7 +642,7 @@ var Game = (function(){
 		var playerCount = same.length;
 		var size = 0, pos = boardPadding;
 		if (playerClass == 'player-top' || playerClass == 'player-bottom') {
-			size = Math.floor((window.innerWidth - boardPadding*2)/playerCount);
+			size = Math.floor((window.innerWidth - boardPadding*2)/playerCount);			
 			same.css('width', size).each(function(index){
 				$(this).css('left', pos);
 				pos += size;
@@ -726,7 +740,7 @@ var Game = (function(){
 		}
 	}
 	function onCardSelect(card) {
-        if (_selectionDone) return;
+        if (_selectionDone || _status == Status.over) return;
 		if (_players.length > 1 && _player == null) {
 			instruction('Select player first', 'error', 2000);
 			return;
@@ -946,16 +960,8 @@ $(document).ready(function(){
 		Game.setup();
 	});
 
-	$('#btnMax').on(eventName, function() {
-		var on = $(this).data('on');
-		if (typeof on === 'undefined') {
-			on = true;
-		} else {
-			on = !on;
-		}
-		Game.maximize(on);
-		$(this).data('on', on);
-		menuSwitch();
+	$('#maximizeBtn').on(eventName, function() {
+		Game.maximize();
 	});
 
 	$(window).on('resize', function(){
@@ -965,8 +971,8 @@ $(document).ready(function(){
 
 function menuSwitch() {
 	var menu = $('#controls');
-	if (menu.is(':visible')) menu.hide(300);
-	else menu.show(300);
+	if (menu.is(':visible')) menu.hide();
+	else menu.show(0);
 }
 return Game;
 })(window.jQuery);

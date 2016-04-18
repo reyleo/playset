@@ -71,6 +71,9 @@
 				<polygon points="156.432,320.208 128.147,291.924 57.437,221.213 85.721,192.929 156.432,263.64 340.279,79.792
 					368.563,108.076 "/>
 			</symbol>
+			<symbol id="icon-maximize">
+				<path d="M28,2h-6c-1.104,0-2,0.896-2,2s0.896,2,2,2h1.2l-4.6,4.601C18.28,10.921,18,11.344,18,12c0,1.094,0.859,2,2,2  c0.641,0,1.049-0.248,1.4-0.6L26,8.8V10c0,1.104,0.896,2,2,2s2-0.896,2-2V4C30,2.896,29.104,2,28,2z M12,18  c-0.641,0-1.049,0.248-1.4,0.6L6,23.2V22c0-1.104-0.896-2-2-2s-2,0.896-2,2v6c0,1.104,0.896,2,2,2h6c1.104,0,2-0.896,2-2  s-0.896-2-2-2H8.8l4.6-4.601C13.72,21.079,14,20.656,14,20C14,18.906,13.141,18,12,18z"/>
+			</symbol>
 		</defs>
 
 		<use x="0" y="0" xlink:href="#curve" id="symbol-curve"/>
@@ -83,14 +86,11 @@
     </div>
     </div>
 	<div id="controls">
-		<div id="counter">
-		</div>
+		<!--<div id="counter"></div>-->
 		<div class="control-buttons">
-			<div class="button" id="btnHint" title="Hint">Hint</div>
-			<!--<div class="button" id="btnMore" title="More">+3</div>-->
+			<!--<div class="button" id="btnHint" title="Hint">Hint</div>-->
 			<div class="button" id="btnStart" title="Start" style="background-color:#993300">Restart</div>
 			<div class="button" id="btnSetup" title="More">Setup</div>
-			<!--<div class="button" id="btnMax" title="Max">Max</div>-->
 			<div id="gameInfo">Version</div>
 		</div>
 	</div>
@@ -127,11 +127,17 @@
 
 <div style="display:none" class="instruction" id="gameMessage"></div>
 
-<div id="menuSwitch" style="padding:6pt">
+<div id="menuSwitch" class="corner-button">
 	<svg width="24pt" height="24pt" viewBox="0 0 12 12">
 		<rect x="1" y="1" width="10" rx="1" ry="1" height="2" />
 		<rect x="1" y="5" width="10" rx="1" ry="1" height="2" />
 		<rect x="1" y="9" width="10" rx="1" ry="1" height="2" /></svg>
+</div>
+
+<div id="maximizeBtn" class="corner-button">
+	<svg width="24pt" height="24pt" viewBox="0 0 32 32">
+		<use xlink:href="#icon-maximize"/>
+	</svg> 
 </div>
 
 <script type="text/javascript" src="game.js"></script>
