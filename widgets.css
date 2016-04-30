@@ -99,20 +99,22 @@ svg.icon {
 }
 .error {
 	position: absolute;
-	width: 20%;
-	margin-left: 40%;
-	height: 36pt;
+	box-sizing: border-box;
+	height: 60pt;
+	padding: 6pt;
 	margin-top: -18pt;
-	top: 40%;
+	width: 80%;
+	margin-left: 10%;
+	left: 0;
+	top: 50%;
+	border-radius: 18pt;
 	background-color: #cc3300;
 	color: white;
-	font-size: 2em;
 	font-weight: bold;
 	font-family: sans-serif;
-	z-index: 101;
 	text-align: center;
-	line-height: 36pt;
-	font-size: 24pt;
+	line-height: 48pt;
+	font-size: 36pt;
 	z-index: 501;
 }
 .overlay .error {

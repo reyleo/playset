@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.065";
+var version = "0.066";
 
 function Card(p) {
     this.color = p[0];
