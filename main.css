@@ -338,8 +338,4 @@
 	/* IE bug */
 	svg use { pointer-events:none; }
 
-	#gameInfo {
-		text-align: center;
-		color: #777;
-		font-size: .6em;
-	}
+

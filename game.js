@@ -1,30 +1,37 @@
 var _Game = (function($){
 
-var version = "0.066";
+var version = "0.078";
 
 function Card(p) {
     this.color = p[0];
     this.shape = p[1];
     this.quantity = p[2] + 1;
     this.fill = p[3];
-	this.dom = null;
-	this.orientation = 'vertical';
 }
 
 Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 }
+Card.prototype.toArray = function() {
+	var p = [];
+	p[0] = this.color;
+	p[1] = this.shape;
+	p[2] = this.quantity - 1;
+	p[3] = this.fill;
+	return p;
+}
+
 var svgNS = "http://www.w3.org/2000/svg";
 var xlinkNS = "http://www.w3.org/1999/xlink";
 Card.prototype._shapes = ["pill", "curve", "rhomb"];
 Card.prototype._colors = ["red", "green", "purple"];
 Card.prototype._fills = ["empty", "filled", "stripes"];
 
-Card.prototype.render = function() {
+Card.prototype.render = function(cardElem) {
 	var svg, symbol;
-	if (this.dom != null) {
-		if (this.dom.hasChildNodes()) {
-			this.dom.removeChild(this.dom.firstChild);
+	if (cardElem != null) {
+		if (cardElem.hasChildNodes()) {
+			cardElem.removeChild(cardElem.firstChild);
 		}
 
 		var group = document.createElement('div');
@@ -50,9 +57,11 @@ Card.prototype.render = function() {
 			svg.appendChild(symbol);
 			group.appendChild(svg);
 		}
-		this.dom.appendChild(group);
+		cardElem.appendChild(group);
 	}
 };
+
+
 var Status = {active: 0, pause: 1, over: 2};
 
 var Game = (function(){
@@ -73,9 +82,12 @@ var Game = (function(){
 		player: 0,
 		next: false
 	};
-	var _status = Status.over;
+	var _status = Status.active;
 	var _eventName = "";
     var _selectionDone = false;
+	var _clockTimer = new Timer(updateTime);
+	var _clockWidget = null;
+	var _bestTime = 0; 
 	var config = {
 		rows: 3,
 		columns: 4,
@@ -84,16 +96,140 @@ var Game = (function(){
 		cardWidth: 300,
 		keepScore: false,
 		maxTime: 10,
-        showSetOnHint: false,
-		colors: ['#fea3aa', '#f8b88b', '#faf884', '#baed91', '#b2cefe', '#f2a2e8']
+        showSetOnHint: true
 	};
+	var _isStorageAvailable = false;
 
-    var _debug = false;
+    var _debug = true;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
         }
     };
+	function updateTime (timer) {
+		_clockWidget.html(timer.toString());
+	}
+	function showTime () {
+		if (_players.length == 1) {
+			_clockWidget.show();
+		}
+	}
+	function setBestTime() {
+		$('#bestTime').html(Timer.formatTime(_bestTime));
+	}
+	function load() {
+		if (!_isStorageAvailable) return false;
+		var data = localStorage.getItem('data');
+		if (data && data.length > 0) {
+			var state = JSON.parse(data);
+			debug('Data loaded: ' + data);
+			if (state.version != version) {
+				debug('Data from previous version');
+				return false;
+			}
+			_deck = [];
+			for (var i = 0; i < state.deck.length; i++) {
+				_deck.push(new Card(state.deck[i]));
+			}
+			_next = state.next;
+			_cardsLeft = _deck.length - _next;
+			_status = state.status;
+			_maximized = state.maximized;
+			_bestTime = state.bestTime;
+			setBestTime();
+			
+			loadPlayers(state.players);
+			fillBoard(state.board);
+			if (_players.length == 1) {
+				if (_status == Status.active) {
+					_clockTimer.start(state.timer);
+				} else {
+					_clockTimer.setTime(state.timer);
+					updateTime(_clockTimer);
+				}
+				_clockWidget.show();
+				if (_maximized) {
+					maximize(true);
+				}
+			} else {
+				$('#maximizeBtn').hide();
+				_clockWidget.hide();
+			}
+			if (_status == Status.over) {
+				findWinners();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	function save() {
+		if (!_isStorageAvailable) return;
+		var deckArr = [], i;
+		for (i = 0; i < _deck.length; i++) {
+			deckArr.push(_deck[i].toArray());
+		}
+		var state = {
+			'version': version, 
+			'deck': deckArr,
+			'next': _next,
+			'players': savePlayers(),
+			'status': _status,
+			'timer': _clockTimer.getTime(),
+			'board': getBoard(),
+			'maximized': _maximized,
+			'bestTime': _bestTime
+		};
+		var data = JSON.stringify(state);
+		//debug('Saving data: ' + data);
+		localStorage.setItem('data', data);
+	}
+
+	function savePlayers() {
+		var save = [], p, newObj;
+		for (var i = 0; i < _players.length; i++) {
+			p = _players[i];
+			newObj = {};
+			for (var k in p) {
+				newObj[k] = p[k];
+			}
+			if (newObj.area) newObj.area = null;
+			save.push(newObj);
+		}
+		return save;
+	}
+
+	function loadPlayers(players) {
+		_players = [];
+		for (var i = 0; i < players.length; i++) {
+			createArea(players[i]);
+			_players.push(players[i]);
+		}
+		initPlayers();
+	}
+
+	function getBoard() {
+		var board = [];
+		$('.cardHolder', _board).each(function() {
+			var card = $(this).find('.card');
+			if (card.length > 0 ) {
+				board.push(card.get(0).card.toArray());
+			} else {
+				board.push(null);
+			}
+		});
+		return board;
+	}
+
+	function fillBoard(board) {
+		$('.cardHolder', _board).each(function(index) {
+			var holder = $(this);
+			holder.find('.card').remove();
+			if (board[index] != null) {
+				placeCard(this, new Card(board[index]), false);
+			}
+		});
+	}
 
     function deal(animation) {
 
@@ -106,19 +242,8 @@ var Game = (function(){
 			if (elem == null) {
 				card = next();
 				if (card != null) {
-					elem = document.createElement('div');
-					elem.className = 'card';
-					$(elem).css(cardCss());
-					elem.card = card;
-					card.dom = elem;
-					card.render();
-                    count++;
-					if (animate) {
-						$(elem).addClass('animate')
-					}
-					
-					places[i].appendChild(elem);
-
+					count++;
+					placeCard(places[i], card, animate);
 				} else {
 					break;
 				}
@@ -130,6 +255,18 @@ var Game = (function(){
 			_counter.innerHTML = "" + _cardsLeft;
 		}
     };
+
+	function placeCard(place, card, animate) {
+		var elem = document.createElement('div');
+		elem.className = 'card';
+		$(elem).css(cardCss());
+		elem.card = card;
+		card.render(elem);
+		if (animate) {
+			$(elem).addClass('animate')
+		}
+		place.appendChild(elem);
+	} 
 
 	function checkForMore() {
         var setNotFound = (findSet() == null);
@@ -150,6 +287,25 @@ var Game = (function(){
 
     function gameOver() {
         instruction("Game over!", 'normal', 2000);
+		findWinners();
+		_status = Status.over;
+		_clockTimer.stop();
+		if (_players.length == 1) {
+			// get time in msec
+			var time = _clockTimer.getTime();
+			if (_bestTime == 0 || time < _bestTime) {
+				_bestTime = time;
+				setBestTime();
+				_clockWidget.addClass('best-time').html('Best time!');
+				window.setTimeout(function() {
+					_clockWidget.removeClass('best-time').html(_clockTimer.toString());
+				}, 5000);
+			}
+		}
+		save();
+    }
+
+	function findWinners() {
         var winners = [];
         var maxPoints = -999;
         var player, points, i;
@@ -168,8 +324,8 @@ var Game = (function(){
         for (i = 0; i < winners.length; i++) {
             winners[i].area.addClass('winner');
         }
-		_status = Status.over;
-    }
+	}
+
 	/*
 	 * Get next card from deck and move pointer
 	 */
@@ -277,6 +433,15 @@ var Game = (function(){
 		if (!config.keepScore) {
 			resetScore();
 		}
+		_clockTimer.stop();
+		if (_players.length > 1) {
+			_clockWidget.hide();
+		} else {
+			_clockTimer.stop();
+			_clockTimer.start();
+			_clockWidget.show();
+		}
+		save();
 	}
 
 	function resetScore() {
@@ -331,6 +496,8 @@ var Game = (function(){
 	function calcHeight() {
 		var h1 = Math.floor($(_board).height() * 0.9 / 3);
 		var boardWidth = $(_board).width();
+		//var colCount = $('.column', _board).length;
+		//var colPercent = _maximized ? 0.18 : (colCount == 4 ? 0.23 : 0.18);
 		var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
 		h1 -= h1 % 3;
@@ -418,6 +585,7 @@ var Game = (function(){
 		var offset = $(_board).offset();
 		boardPadding = offset.top;
 		calcCardSize();
+		_isStorageAvailable = storageAvailable();
 
         var i;
         for (i = 0; i < config.columns; i++) {
@@ -428,18 +596,30 @@ var Game = (function(){
 		// fill cards
 		var p = [0, 0, 0, 0];
 
-		var cardIndex = 0;
-		do {
-			_deck[cardIndex++] = new Card(p);
-		} while (nextCombination(p, MAX_VAL));
-
-		_counter = document.getElementById('counter');
-
+		//
 		// event handlers
+		//
 		_eventName = 'click';
 		if ('ontouchstart' in document.documentElement) {
 			_eventName = 'touchstart';
 		}
+
+		_counter = document.getElementById('counter');
+		_clockWidget = $('<div>').addClass('game-timer');
+		_clockWidget.appendTo($('body')).hide();
+		_clockWidget.on(_eventName, function (e) {
+			if (_status != Status.active) return;
+			if (_clockTimer.isRunning()) {
+				_clockTimer.pause();
+				_clockWidget.html('Paused');
+				$(_board).hide();
+			} else {
+				_clockTimer.start();
+				$(_board).show();
+			}
+			e.preventDefault();
+		});
+
 
 		$(_board).on(_eventName, '.card', function() {
 			onCardSelect(this);
@@ -472,19 +652,33 @@ var Game = (function(){
 		$('#setupDialog .close').on(_eventName, function() {
 			hideDialog('#setupDialog');
 			$(_board).show();
+			showTime();
 			resize();
 		});
 
-		// create 1 player
-		createPlayers(1);
-		_players[0].area = createArea('player-bottom');
-		_players[0].layout = 'horizontal';
-		_players[0].class = "player-bottom";
-		_players[0].position = "bottom";
-		initPlayers();
+		window.addEventListener('beforeunload', function() {
+			_clockTimer.pause();
+			console.log('-- before unload');
+			save();
+		});
+		
+		if (!load()) {
+			var cardIndex = 0;
+			do {
+				_deck[cardIndex++] = new Card(p);
+			} while (nextCombination(p, MAX_VAL));
 
-        // finally restart game
-        restart();
+			// create 1 player
+			createPlayers(1);
+			_players[0].layout = 'horizontal';
+			_players[0].class = "player-bottom";
+			_players[0].position = "bottom";
+			createArea(_players[0]);
+			initPlayers();
+
+			// finally restart game
+			restart();
+		}
     }
 
 	function setup() {
@@ -492,6 +686,7 @@ var Game = (function(){
 		// do not repeat animation
 		cards().removeClass('animate');
 		$(_board).hide();
+		_clockWidget.hide();
 		menuSwitch();
 	}
 	function setupPlayer() {
@@ -527,8 +722,8 @@ var Game = (function(){
 				return;
 			}
 			if (playerClass != "") {
-				player.area = createArea(playerClass);
 				player.class = playerClass;
+				createArea(player);
 				if (_setup.next && _setup.player < _players.length-1) {
 					_setup.player++;
 					window.setTimeout(setupPlayer, 10);
@@ -557,26 +752,29 @@ var Game = (function(){
         restart();
     }
 
-	function createArea(playerClass) {
+	function createArea(player) {
 		var area = $('<div class="player-area"></div>');
 		var contents = $('<div class="player-contents"></div');
-		area.addClass(playerClass).appendTo($('body'));
-		resizePlayers(playerClass);
-		if (playerClass == 'player-bottom' || playerClass == 'player-left') {
-			contents.append('<div class="win-counter">0</div><div class="fail-counter">0</div>')
+		area.addClass(player.class).appendTo($('body'));
+		resizePlayers(player.class);
+		if (player.class == 'player-bottom' || player.class == 'player-left') {
+			contents.append('<div class="win-counter">' + player.wins + '</div>')
+			contents.append('<div class="fail-counter">' + player.fails + '</div>')
 		} else {
-			contents.append('<div class="fail-counter">0</div><div class="win-counter">0</div>')
+			contents.append('<div class="fail-counter">' + player.fails + '</div>')
+			contents.append('<div class="win-counter">' + player.wins + '</div>')
 		}
 		area.append(contents);
 		//area.append('<div>' + (_setup.player+1) + '</div>');
-		//area.css('backgroundColor', config.colors[_setup.player]);
-		area.data('player', _setup.player);
+		player.area = area;
+		area.data('player', player.id);
 		return area;
 	}
 
 	function initPlayers() {
 		$('.player-area').on(_eventName, function() {
 			// do not react on user click if game is over
+			debug('Game status = ' + _status);
 			if (_status == Status.over) return;
 			// exit if not first :)
 			var clicked = $(this);
@@ -730,7 +928,7 @@ var Game = (function(){
 
 		if (config.showSetOnHint) cards().removeClass('hint selected');
 		if (set) {
-			instruction('Set exists!', 'green', 2000);
+			//instruction('Set exists!', 'green', 2000);
 			//showTooltip($(btn), 'Set exists!', 2000);
 			if (config.showSetOnHint) $(set).addClass('hint');
 		} else {
@@ -796,6 +994,7 @@ var Game = (function(){
 			playerFail();
 		}
 
+		save();
 	}
     function autoPlay() {
         var set;
@@ -848,6 +1047,7 @@ var Game = (function(){
 			_player.area.removeClass('queue').addClass('clicked');
 			startTimer(_player.area);
 		}
+		save();
 	}
 
     return {
@@ -910,6 +1110,20 @@ function showDialog(id) {
 function hideDialog(id) {
 	$('#setupDialog').parent().hide();
 }
+
+function storageAvailable() {
+	try {
+		var storage = window.localStorage,
+			x = '__storage_test__';
+		storage.setItem(x, x);
+		storage.removeItem(x);
+		return true;
+	}
+	catch(e) {
+		return false;
+	}
+}
+
 function updateReady() {
     alert("Update available!");
     if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
@@ -936,7 +1150,6 @@ $(document).ready(function(){
 	window.setTimeout(function(){
 		Game.init();
 	}, 10);
-
 
 
 	$('#btnHint').on(eventName, function(){

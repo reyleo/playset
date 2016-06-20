@@ -7,6 +7,7 @@
 <head>
     <title>Play Set Game</title>
 	<script src="jquery-2.2.0.min.js"></script>
+	<script src="timer.js"></script>
 	<link href="widgets.css" rel="stylesheet" type="text/css"/>
 	<link href="main.css" rel="stylesheet" type="text/css"/>
 	<!--<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed&subset=latin,cyrillic' rel='stylesheet' type='text/css'>-->
@@ -88,10 +89,10 @@
 	<div id="controls">
 		<!--<div id="counter"></div>-->
 		<div class="control-buttons">
-			<!--<div class="button" id="btnHint" title="Hint">Hint</div>-->
+			<!--<div class="button" id="btnHint" title="Solve">Solve</div>-->
 			<div class="button" id="btnStart" title="Start" style="background-color:#993300">Restart</div>
 			<div class="button" id="btnSetup" title="More">Setup</div>
-			<div id="gameInfo">Version</div>
+			
 		</div>
 	</div>
 
@@ -113,7 +114,11 @@
 	<div class="dialog-title">Setup</div>
 	<div class="close"><svg class="icon"><use xlink:href="#icon-cross"/></svg></div>
 	<div class="dialog-content">
-		<p class="clearfix"><label>Keep score: </label><span class="check" id="keepScore"><svg class="icon"><use xlink:href="#icon-check"/></svg></span</p>
+		<p class="clearfix"><label>Keep score: </label><span class="check" id="keepScore"><svg class="icon"><use xlink:href="#icon-check"/></svg></span>
+		</p>
+		<p>
+			<label>Best time: </label><span id="bestTime">-</span>
+		</p>
 		<p>Select number of players:</p>
 		<div class="button">1</div>
 		<div class="button">2</div>
@@ -121,6 +126,8 @@
 		<div class="button">4</div>
 		<div class="button">5</div>
 		<div class="button">6</div>
+
+		<span id="gameInfo">Version</span>
 	</div>
 </div>
 </div>

@@ -77,6 +77,14 @@ svg.icon {
 	font-size: 15pt;
 	margin-right: 6pt;
 }
+#gameInfo {
+	text-align: center;
+	color: #ccc;
+	font-size: .6em;
+	position: absolute;
+	right: .5em;
+	bottom: .5em;
+}
 .clearfix {
 	content: "";
 	display: table;
@@ -185,4 +193,55 @@ svg.icon {
 .instruction.green {
 	background-color: #baed91;
 	color: #000;
+}
+/*
+ * Timer
+ */
+.game-timer {
+	position: absolute;
+	border-radius: 18pt;
+	height: 36pt;
+	padding: 3pt 18pt;
+	color: #fff;
+	background-color: #CCC;
+	font-family: sans-serif;
+	font-size: 20pt;
+	line-height: 30pt;
+	font-weight: bold;
+	box-sizing: border-box;
+	width: 8em;
+	top: 0;
+	left: 50%;
+	margin-left: -4em;
+	z-index: 555;
+	text-align: center;
+	text-shadow: 0 0.1em rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+}
+
+@keyframes zoom {
+	0% {
+	}
+	10% {
+		top: 50%;
+		margin-top: -18pt;
+		width: 16em;
+		margin-left: -8em;
+	}
+	90% {
+		top: 50%;
+		margin-top: -18pt;
+		width: 16em;
+		margin-left: -8em;
+	}
+	100% {
+	}
+}
+
+.best-time {
+	animation: 5s zoom 1;
+	background-color: #f8b500;
+}
+
+.best-time {
 }
