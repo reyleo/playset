@@ -92,7 +92,7 @@
 			<!--<div class="button" id="btnHint" title="Solve">Solve</div>-->
 			<div class="button" id="btnStart" title="Start" style="background-color:#993300">Restart</div>
 			<div class="button" id="btnSetup" title="More">Setup</div>
-			
+			<div class="button" id="btnTop" title="Top">Top</div>
 		</div>
 	</div>
 
@@ -116,9 +116,6 @@
 	<div class="dialog-content">
 		<p class="clearfix"><label>Keep score: </label><span class="check" id="keepScore"><svg class="icon"><use xlink:href="#icon-check"/></svg></span>
 		</p>
-		<p>
-			<label>Best time: </label><span id="bestTime">-</span>
-		</p>
 		<p>Select number of players:</p>
 		<div class="button">1</div>
 		<div class="button">2</div>
@@ -128,6 +125,29 @@
 		<div class="button">6</div>
 
 		<span id="gameInfo">Version</span>
+	</div>
+</div>
+</div>
+
+<!-- TOP RESULTS -->
+<div class="overlay" style="display:none">
+<div class="dialog" id="topResults">
+	<div class="dialog-title">Top results</div>
+	<div class="close"><svg class="icon"><use xlink:href="#icon-cross"/></svg></div>
+	<div class="dialog-content">
+	<ol>
+		<li>4:35 <span>07.07.2016</span></li>
+		<li>4:36 <span>07.07.2016</span></li>
+		<li>4:38 <span>07.07.2016</span></li>
+		<li>4:39 <span>07.07.2016</span></li>
+		<li>4:42 <span>07.07.2016</span></li>
+		<li>4:35 <span>07.07.2016</span></li>
+		<li>4:35 <span>07.07.2016</span></li>
+		<li>4:35 <span>07.07.2016</span></li>
+		<li>4:35 <span>07.07.2016</span></li>
+		<li>4:35 <span>07.07.2016</span></li>
+	</ol>
+	<div class="button" id="clearResults">Clear</div>
 	</div>
 </div>
 </div>

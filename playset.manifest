@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# Version 0.070
+# Version 0.080
 
 CACHE:
 sound/slip.mp3
@@ -8,6 +8,6 @@ main.css
 widgets.css
 game.html
 game.js
-history.js
 jquery-2.2.0.min.js
+timer.js
 apple-touch-icon.png

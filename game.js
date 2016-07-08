@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.078";
+var version = "0.080";
 
 function Card(p) {
     this.color = p[0];
@@ -87,7 +87,7 @@ var Game = (function(){
     var _selectionDone = false;
 	var _clockTimer = new Timer(updateTime);
 	var _clockWidget = null;
-	var _bestTime = 0; 
+	var _topResults = [];
 	var config = {
 		rows: 3,
 		columns: 4,
@@ -100,7 +100,7 @@ var Game = (function(){
 	};
 	var _isStorageAvailable = false;
 
-    var _debug = true;
+    var _debug = false;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
@@ -109,14 +109,13 @@ var Game = (function(){
 	function updateTime (timer) {
 		_clockWidget.html(timer.toString());
 	}
+
 	function showTime () {
 		if (_players.length == 1) {
 			_clockWidget.show();
 		}
 	}
-	function setBestTime() {
-		$('#bestTime').html(Timer.formatTime(_bestTime));
-	}
+
 	function load() {
 		if (!_isStorageAvailable) return false;
 		var data = localStorage.getItem('data');
@@ -135,8 +134,7 @@ var Game = (function(){
 			_cardsLeft = _deck.length - _next;
 			_status = state.status;
 			_maximized = state.maximized;
-			_bestTime = state.bestTime;
-			setBestTime();
+			if (state.topResults) _topResults = state.topResults;
 			
 			loadPlayers(state.players);
 			fillBoard(state.board);
@@ -178,7 +176,7 @@ var Game = (function(){
 			'timer': _clockTimer.getTime(),
 			'board': getBoard(),
 			'maximized': _maximized,
-			'bestTime': _bestTime
+			'topResults': _topResults
 		};
 		var data = JSON.stringify(state);
 		//debug('Saving data: ' + data);
@@ -290,16 +288,13 @@ var Game = (function(){
 		findWinners();
 		_status = Status.over;
 		_clockTimer.stop();
+		updateTime(_clockTimer);
 		if (_players.length == 1) {
 			// get time in msec
 			var time = _clockTimer.getTime();
-			if (_bestTime == 0 || time < _bestTime) {
-				_bestTime = time;
-				setBestTime();
-				_clockWidget.addClass('best-time').html('Best time!');
-				window.setTimeout(function() {
-					_clockWidget.removeClass('best-time').html(_clockTimer.toString());
-				}, 5000);
+			var position = checkTopResult(time); 
+			if (position !== -1) {
+				showTopResults(position);
 			}
 		}
 		save();
@@ -326,6 +321,53 @@ var Game = (function(){
         }
 	}
 
+	function newTopResult(time) {
+		return {
+			time: time, 
+			date: new Date().toLocaleDateString()
+		}
+	}
+
+	function checkTopResult(time) {
+		var i;
+		for (i = 0; i < _topResults.length; i++) {
+			if ( time < _topResults[i].time ) {
+				_topResults.splice(i, 0, newTopResult(time));
+				if (_topResults.length > 10) {
+					// pop last result :(
+					_topResults.pop();
+				}
+				return i;
+			}
+		}
+		if (_topResults.length < 10) {
+			_topResults.push(newTopResult(time));
+			return _topResults.length-1;
+		}
+		return -1;
+	}
+
+	function showTopResults(current) {
+		if (typeof current === 'undefined') current = -1;
+		var list = $('#topResults ol');
+		var i, item;
+		list.empty();
+		for (i = 0; i < _topResults.length; i++) {
+			item = $('<li>');
+			item.html(Timer.formatTime(_topResults[i].time));
+			item.append('<span class="date">' + _topResults[i].date + '</span>');
+			if (current == i) {
+				item.addClass('current');
+			}
+			list.append(item);
+		}
+		showDialog('#topResults');
+	}
+
+	function clearTopResults() {
+		_topResults = [];
+		$('#topResults ol').empty();
+	}
 	/*
 	 * Get next card from deck and move pointer
 	 */
@@ -372,26 +414,19 @@ var Game = (function(){
                 debug("findSet - set found in " + cards.length + " cards");
 				return selection;
 			}
-
-			if (combination[n] >= max) {
-				for (k = n, m = max-1; k >=0; k--,m--) {
-					if (combination[k] < m) {
-						combination[k]++;
-						for (j = k+1; j < combination.length; j++) {
-							combination[j] = combination[j-1] + 1;
-						}
-						break;
+			for (k = n, m = max; k >= 0; k--,m--) {
+				if (combination[k] < m) {
+					combination[k]++;
+					for (j = k+1; j < combination.length; j++) {
+						combination[j] = combination[j-1] + 1;
 					}
-				}
-				if (k < 0) {
 					break;
 				}
-
-			} else {
-				combination[n]++;
 			}
-
-
+			if (k < 0) {
+				break;
+			}
+			
 		} while (true);
         debug("findSet - not found in " + cards.length + " cards");
 		return null;
@@ -654,6 +689,10 @@ var Game = (function(){
 			$(_board).show();
 			showTime();
 			resize();
+		});
+
+		$('#topResults #clearResults').on(_eventName, function() {
+			clearTopResults();
 		});
 
 		window.addEventListener('beforeunload', function() {
@@ -1058,6 +1097,7 @@ var Game = (function(){
 		setup: setup,
 		resize: resize,
         autoPlay: autoPlay,
+		topResults: showTopResults,
 		maximize: maximize
     };
 })();
@@ -1131,8 +1171,10 @@ function updateReady() {
     }
     //alert("Version " + version + " installed");
 }
-
-$(document).ready(function(){
+/**
+ * Document ready
+ */
+$(function(){
 
     if (window.applicationCache) {
         window.applicationCache.addEventListener('updateready', updateReady, false);
@@ -1175,6 +1217,15 @@ $(document).ready(function(){
 
 	$('#maximizeBtn').on(eventName, function() {
 		Game.maximize();
+	});
+
+	$('#topResults .close').on(eventName, function (){
+		$(this).closest('.dialog').parent().hide();
+	});
+
+	$('#btnTop').on(eventName, function(){
+		Game.topResults();
+		menuSwitch();
 	});
 
 	$(window).on('resize', function(){
