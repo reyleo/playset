@@ -122,10 +122,12 @@ var Game = (function(){
 		if (data && data.length > 0) {
 			var state = JSON.parse(data);
 			debug('Data loaded: ' + data);
+			/*
 			if (state.version != version) {
 				debug('Data from previous version');
 				return false;
 			}
+			*/
 			_deck = [];
 			for (var i = 0; i < state.deck.length; i++) {
 				_deck.push(new Card(state.deck[i]));
