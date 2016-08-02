@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.080";
+var version = "0.087";
 
 function Card(p) {
     this.color = p[0];
@@ -71,7 +71,6 @@ var Game = (function(){
     var _deck = [];
 	var _next = 0;
 	var _counter = null;
-	var boardPadding = 0;
 	var _players = [];
 	var _player = null;
 	var _queue = [];
@@ -87,6 +86,7 @@ var Game = (function(){
     var _selectionDone = false;
 	var _clockTimer = new Timer(updateTime);
 	var _clockWidget = null;
+	var _exit = false;
 	var _topResults = [];
 	var config = {
 		rows: 3,
@@ -98,6 +98,8 @@ var Game = (function(){
 		maxTime: 10,
         showSetOnHint: true
 	};
+	var boardPadding = 0;
+
 	var _isStorageAvailable = false;
 
     var _debug = false;
@@ -108,6 +110,7 @@ var Game = (function(){
     };
 	function updateTime (timer) {
 		_clockWidget.html(timer.toString());
+		//saveTime(timer);
 	}
 
 	function showTime () {
@@ -119,6 +122,13 @@ var Game = (function(){
 	function load() {
 		if (!_isStorageAvailable) return false;
 		var data = localStorage.getItem('data');
+		var timeValue = 0;
+		/*
+		var timeStr = localStorage.getItem('time');
+		if (timeStr) {
+			timeValue = parseInt(timeStr);
+		}
+		*/
 		if (data && data.length > 0) {
 			var state = JSON.parse(data);
 			debug('Data loaded: ' + data);
@@ -162,7 +172,11 @@ var Game = (function(){
 		}
 		return false;
 	}
-
+	function saveTime(timer) {
+		if (_isStorageAvailable) {
+			localStorage.setItem('time', timer.getTime());
+		}
+	}
 	function save() {
 		if (!_isStorageAvailable) return;
 		var deckArr = [], i;
@@ -183,6 +197,7 @@ var Game = (function(){
 		var data = JSON.stringify(state);
 		//debug('Saving data: ' + data);
 		localStorage.setItem('data', data);
+		//saveTime(_clockTimer);
 	}
 
 	function savePlayers() {
@@ -613,7 +628,13 @@ var Game = (function(){
 		resize();	
 		
 	}
-
+	function escape() {
+		if (!_exit) {
+			_clockTimer.pause();
+			save();
+			_exit = true;
+		}
+	}
     function init() {
 		_board = document.getElementById("gameBoard");
 
@@ -650,6 +671,7 @@ var Game = (function(){
 				_clockTimer.pause();
 				_clockWidget.html('Paused');
 				$(_board).hide();
+				save();
 			} else {
 				_clockTimer.start();
 				$(_board).show();
@@ -697,11 +719,9 @@ var Game = (function(){
 			clearTopResults();
 		});
 
-		window.addEventListener('beforeunload', function() {
-			_clockTimer.pause();
-			console.log('-- before unload');
-			save();
-		});
+		window.addEventListener('unload', escape);
+		window.addEventListener('pagehide', escape);
+		window.addEventListener('beforeunload', escape);
 		
 		if (!load()) {
 			var cardIndex = 0;

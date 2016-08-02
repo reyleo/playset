@@ -10,10 +10,20 @@ var Timer = function (callback) {
 	};
 	var _callback = null;
 
+	var val2int = function(val){
+		var num = 0;
+		if (typeof val === 'undefined') {
+			num = 0;
+		} else if (typeof val === 'string') {
+			num = parseInt(val);
+		} else {
+			num = Math.floor(val);
+		}
+		return num;
+	};
 	var start = function(from) {
-			if (typeof from === 'undefined') from = 0; 
 			if (_status != 2) {
-				_ms = from;
+				_ms = val2int(from);
 			} 
 			_ticks = Math.floor(_ms / 1000);
 			
@@ -46,11 +56,11 @@ var Timer = function (callback) {
 			_status = 2;
 		},
 	setTime = function(ms) {
-			_ms = ms;
+			_ms = val2int(ms);
 			_ticks = Math.floor(_ms / 1000);
 		},
 	getTime = function () {
-			return _ms;
+			return isRunning() ? _ticks * 1000 : _ms;
 		},
 	getTicks = function() {
 			return _ticks;
