@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.087";
+var version = "0.088";
 
 function Card(p) {
     this.color = p[0];
@@ -527,6 +527,7 @@ var Game = (function(){
 		var columns = $('#gameBoard .column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
+		onColumnNumberChange();
         debug("1 column added")
 		return true;
 	}
@@ -548,9 +549,10 @@ var Game = (function(){
 	function calcHeight() {
 		var h1 = Math.floor($(_board).height() * 0.9 / 3);
 		var boardWidth = $(_board).width();
-		//var colCount = $('.column', _board).length;
-		//var colPercent = _maximized ? 0.18 : (colCount == 4 ? 0.23 : 0.18);
-		var w2 = Math.floor(boardWidth * 0.18);
+		var colCount = $('.column', _board).length;
+		var colWidth = (!_maximized || colCount == 5) ? 0.18 : 0.23;
+		var w2 = Math.floor(boardWidth * colWidth);
+		//var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
 		h1 -= h1 % 3;
 		var h2 = w2/2 * 3;
@@ -570,7 +572,6 @@ var Game = (function(){
 			'margin-bottom': margin
 		};
 	}
-
 	function cardCss() {
 		var r = Math.round(config.cardHeight * 0.06);
 		return {
@@ -588,13 +589,21 @@ var Game = (function(){
 		}
 	}
 
+	function onColumnNumberChange() {
+		if (_maximized) resizeCards();
+	}
+
+	function resizeCards() {
+		calcCardSize();
+		$('.card', _board).css(cardCss());
+		$('.cardHolder', _board).css(cardHolderCss());
+		$('.column', _board).width(config.cardWidth);
+	}
+
 	function resize() {
 		var newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
-			calcCardSize();
-			$('.card', _board).css(cardCss());
-			$('.cardHolder', _board).css(cardHolderCss());
-			$('.column', _board).width(config.cardWidth);
+			resizeCards();
 		}
 		resizePlayers('player-top');
 		resizePlayers('player-bottom');
@@ -625,7 +634,7 @@ var Game = (function(){
 
 		_maximized = on;
 		$('#gameContainer').css(css);
-		resize();	
+		resizeCards();	
 		
 	}
 	function escape() {
@@ -642,13 +651,13 @@ var Game = (function(){
 
 		var offset = $(_board).offset();
 		boardPadding = offset.top;
-		calcCardSize();
 		_isStorageAvailable = storageAvailable();
 
         var i;
         for (i = 0; i < config.columns; i++) {
 			appendColumn();
         }
+		calcCardSize();
 
 		var MAX_VAL = 2;
 		// fill cards
@@ -1038,6 +1047,7 @@ var Game = (function(){
 					}
 				});
 				$('.column:last', _board).remove();
+				onColumnNumberChange();
                 debug("1 column removed");
 			} else {
 				deal(true);
