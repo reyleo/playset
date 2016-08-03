@@ -252,6 +252,9 @@ var Game = (function(){
         var places = document.querySelectorAll('#gameBoard .cardHolder');
 		var elem, card, count = 0;
 
+		// remove animation
+		cards().find('.animate').removeClass('animate');
+
 		for (var i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
 			if (elem == null) {
@@ -753,8 +756,6 @@ var Game = (function(){
 
 	function setup() {
 		showDialog('#setupDialog');
-		// do not repeat animation
-		cards().removeClass('animate');
 		$(_board).hide();
 		_clockWidget.hide();
 		menuSwitch();
