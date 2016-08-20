@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.088";
+var version = "0.090";
 
 function Card(p) {
     this.color = p[0];
@@ -237,6 +237,10 @@ var Game = (function(){
 	}
 
 	function fillBoard(board) {
+		var columns = $('.column', _board);
+		if (board.length > (config.rows * columns.length)) {
+			appendColumn();
+		}
 		$('.cardHolder', _board).each(function(index) {
 			var holder = $(this);
 			holder.find('.card').remove();
@@ -660,7 +664,7 @@ var Game = (function(){
         for (i = 0; i < config.columns; i++) {
 			appendColumn();
         }
-		calcCardSize();
+		//calcCardSize();
 
 		var MAX_VAL = 2;
 		// fill cards
@@ -752,6 +756,7 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
+		resizeCards();
     }
 
 	function setup() {

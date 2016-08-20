@@ -1,9 +1,13 @@
 CACHE MANIFEST
 
-# Version 0.088
+# Version 0.089
 
 CACHE:
 sound/slip.mp3
+icons/set-icon-192x192.png
+icons/set-icon-96x96.png
+icons/set-icon-256x256.png
+icons/set-icon-384x384.png
 main.css
 widgets.css
 game.html
