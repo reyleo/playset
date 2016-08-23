@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.092";
+var version = "0.093";
 
 function Card(p) {
     this.color = p[0];
@@ -87,7 +87,9 @@ var Game = (function(){
 	var _clockTimer = new Timer(updateTime);
 	var _clockWidget = null;
 	var _exit = false;
+	var _userPause = false;
 	var _topResults = [];
+
 	var config = {
 		rows: 3,
 		columns: 4,
@@ -108,14 +110,27 @@ var Game = (function(){
             window.console.log(str);
         }
     };
+	function isPause() {
+		return _status == Status.pause;
+	}
 	function updateTime (timer) {
 		_clockWidget.html(timer.toString());
 		//saveTime(timer);
 	}
 
+	function isTimerOn() {
+		return _players.length == 1;
+	}
+
 	function showTime () {
-		if (_players.length == 1) {
+		if (isTimerOn()) {
 			_clockWidget.show();
+		}
+	}
+
+	function startTime() {
+		if (isTimerOn()) {
+			_clockTimer.start();
 		}
 	}
 
@@ -658,6 +673,24 @@ var Game = (function(){
 			_exit = true;
 		}
 	}
+
+	function clickPause(e) {
+
+		if (_status != Status.active && _status != Status.pause) return;
+		if (_clockTimer.isRunning()) {
+			_clockTimer.pause();
+			_clockWidget.html('Paused');
+			$(_board).hide();
+			_userPause = true;
+			save();
+		} else {
+			_clockTimer.start();
+			$(_board).show();
+			_userPause = false;
+		}
+		e.preventDefault();
+	}
+
     function init() {
 		_board = document.getElementById("gameBoard");
 
@@ -688,19 +721,7 @@ var Game = (function(){
 		_counter = document.getElementById('counter');
 		_clockWidget = $('<div>').addClass('game-timer');
 		_clockWidget.appendTo($('body')).hide();
-		_clockWidget.on(_eventName, function (e) {
-			if (_status != Status.active) return;
-			if (_clockTimer.isRunning()) {
-				_clockTimer.pause();
-				_clockWidget.html('Paused');
-				$(_board).hide();
-				save();
-			} else {
-				_clockTimer.start();
-				$(_board).show();
-			}
-			e.preventDefault();
-		});
+		_clockWidget.on(_eventName, clickPause);
 
 
 		$(_board).on(_eventName, '.card', function() {
@@ -733,9 +754,11 @@ var Game = (function(){
 
 		$('#setupDialog .close').on(_eventName, function() {
 			hideDialog('#setupDialog');
-			$(_board).show();
+			if (!_userPause) {
+				$(_board).show();
+				startTime();
+			}
 			showTime();
-			resize();
 		});
 
 		$('#topResults #clearResults').on(_eventName, function() {
@@ -789,6 +812,9 @@ var Game = (function(){
 		showDialog('#setupDialog');
 		$(_board).hide();
 		_clockWidget.hide();
+		if (!_userPause) {
+			_clockTimer.pause();
+		}
 		menuSwitch();
 	}
 
