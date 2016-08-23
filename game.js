@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.091";
+var version = "0.092";
 
 function Card(p) {
     this.color = p[0];
@@ -257,7 +257,7 @@ var Game = (function(){
 		var elem, card, count = 0;
 
 		// remove animation
-		cards().find('.animate').removeClass('animate');
+		var an = cards().filter('.animate').removeClass('animate');
 
 		for (var i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
