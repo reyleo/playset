@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.090";
+var version = "0.091";
 
 function Card(p) {
     this.color = p[0];
@@ -147,7 +147,7 @@ var Game = (function(){
 			_status = state.status;
 			_maximized = state.maximized;
 			if (state.topResults) _topResults = state.topResults;
-			
+
 			loadPlayers(state.players);
 			fillBoard(state.board);
 			if (_players.length == 1) {
@@ -158,13 +158,13 @@ var Game = (function(){
 					updateTime(_clockTimer);
 				}
 				_clockWidget.show();
-				if (_maximized) {
-					maximize(true);
-				}
 			} else {
-				$('#maximizeBtn').hide();
 				_clockWidget.hide();
 			}
+			if (_maximized) {
+				maximize(true);
+			}
+			
 			if (_status == Status.over) {
 				findWinners();
 			}
@@ -184,7 +184,7 @@ var Game = (function(){
 			deckArr.push(_deck[i].toArray());
 		}
 		var state = {
-			'version': version, 
+			'version': version,
 			'deck': deckArr,
 			'next': _next,
 			'players': savePlayers(),
@@ -288,7 +288,7 @@ var Game = (function(){
 			$(elem).addClass('animate')
 		}
 		place.appendChild(elem);
-	} 
+	}
 
 	function checkForMore() {
         var setNotFound = (findSet() == null);
@@ -316,7 +316,7 @@ var Game = (function(){
 		if (_players.length == 1) {
 			// get time in msec
 			var time = _clockTimer.getTime();
-			var position = checkTopResult(time); 
+			var position = checkTopResult(time);
 			if (position !== -1) {
 				showTopResults(position);
 			}
@@ -347,7 +347,7 @@ var Game = (function(){
 
 	function newTopResult(time) {
 		return {
-			time: time, 
+			time: time,
 			date: new Date().toLocaleDateString()
 		}
 	}
@@ -450,7 +450,7 @@ var Game = (function(){
 			if (k < 0) {
 				break;
 			}
-			
+
 		} while (true);
         debug("findSet - not found in " + cards.length + " cards");
 		return null;
@@ -640,10 +640,17 @@ var Game = (function(){
 		}
 
 		_maximized = on;
+		setMaximizeIcon();
 		$('#gameContainer').css(css);
-		resizeCards();	
-		
+		resizeCards();
+
 	}
+
+	function setMaximizeIcon() {
+		var src = _maximized ? '#icon-minimize' : '#icon-maximize';
+		document.querySelector('#maximizeBtn use').setAttributeNS('http://www.w3.org/1999/xlink', 'href', src);
+	}
+
 	function escape() {
 		if (!_exit) {
 			_clockTimer.pause();
@@ -735,10 +742,15 @@ var Game = (function(){
 			clearTopResults();
 		});
 
+		$('#maximizeBtn').on(_eventName, function() {
+			maximize();
+			save();
+		});
+
 		window.addEventListener('unload', escape);
 		window.addEventListener('pagehide', escape);
 		window.addEventListener('beforeunload', escape);
-		
+
 		if (!load()) {
 			var cardIndex = 0;
 			do {
@@ -756,8 +768,22 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
+		showMaximize();
 		resizeCards();
     }
+
+	function showMaximize() {
+		var players = document.querySelectorAll('.player-left,.player-right');
+		
+		if (players.length == 0) {
+			setMaximizeIcon();
+			$('#maximizeBtn').show();
+			return true;
+		} else {
+			$('#maximizeBtn').hide();
+			return false
+		}
+	}
 
 	function setup() {
 		showDialog('#setupDialog');
@@ -765,6 +791,7 @@ var Game = (function(){
 		_clockWidget.hide();
 		menuSwitch();
 	}
+
 	function setupPlayer() {
 		instruction('Click on player area');
 		var player = _players[_setup.player];
@@ -814,15 +841,10 @@ var Game = (function(){
     function finishSetup() {
 		$(_board).show();
 		
-		if (_players.length > 1) {
-			if (_maximized) {
-				maximize(false);
-			}
-			$('#maximizeBtn').hide();
-		} else {
-			$('#maximizeBtn').show();
+		if (!showMaximize() && _maximized) {
+			maximize(false);
 		}
-		
+
         $('#gameMessage').hide();
         initPlayers();
         restart();
@@ -916,7 +938,7 @@ var Game = (function(){
 		var playerCount = same.length;
 		var size = 0, pos = boardPadding;
 		if (playerClass == 'player-top' || playerClass == 'player-bottom') {
-			size = Math.floor((window.innerWidth - boardPadding*2)/playerCount);			
+			size = Math.floor((window.innerWidth - boardPadding*2)/playerCount);
 			same.css('width', size).each(function(index){
 				$(this).css('left', pos);
 				pos += size;
@@ -1139,6 +1161,7 @@ var Game = (function(){
 		maximize: maximize
     };
 })();
+
 function showTooltip(target, text, msec) {
 	var tip = document.getElementById('toolbarTip');
 	tip.style.visibility = 'hidden';
@@ -1251,10 +1274,6 @@ $(function(){
 
 	$('#btnSetup').on(eventName, function() {
 		Game.setup();
-	});
-
-	$('#maximizeBtn').on(eventName, function() {
-		Game.maximize();
 	});
 
 	$('#topResults .close').on(eventName, function (){

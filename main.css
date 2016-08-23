@@ -212,10 +212,12 @@
 		width: 36pt;
 		height: 36pt;
 		box-sizing: border-box;
-		fill: #333;
 		z-index: 100;
 		padding: 6pt;
 		cursor: pointer;
+	}
+	.corner-button svg {
+		fill: #333;
 	}
 	#menuSwitch {
 		top: 0;
