@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.093";
+var version = "0.095";
 
 function Card(p) {
     this.color = p[0];
@@ -241,9 +241,9 @@ var Game = (function(){
 	function getBoard() {
 		var board = [];
 		$('.cardHolder', _board).each(function() {
-			var card = $(this).find('.card');
-			if (card.length > 0 ) {
-				board.push(card.get(0).card.toArray());
+			var cardElem = this.querySelector('.card');
+			if (cardElem != null) {
+				board.push(cardElem.card.toArray());
 			} else {
 				board.push(null);
 			}
@@ -257,8 +257,7 @@ var Game = (function(){
 			appendColumn();
 		}
 		$('.cardHolder', _board).each(function(index) {
-			var holder = $(this);
-			holder.find('.card').remove();
+			$(this).find('.card').remove();
 			if (board[index] != null) {
 				placeCard(this, new Card(board[index]), false);
 			}
@@ -756,7 +755,9 @@ var Game = (function(){
 			hideDialog('#setupDialog');
 			if (!_userPause) {
 				$(_board).show();
-				startTime();
+				if (_status == Status.active) {
+					startTime();
+				}
 			}
 			showTime();
 		});
@@ -926,7 +927,7 @@ var Game = (function(){
 
 	function startTimer(area) {
 		_countDown = config.maxTime + 1;
-		area.append('<div class="player-timer"></div>');
+		$('<div class="player-timer"></div>').insertBefore(area[0].firstChild);
 		timerEvent();
 	}
 
