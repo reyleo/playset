@@ -83,9 +83,8 @@ svg.icon {
 	text-align: center;
 	color: #ccc;
 	font-size: .6em;
-	position: absolute;
-	right: .5em;
-	bottom: .5em;
+	line-height: 24pt;
+	margin-left: 1em;
 }
 .clearfix {
 	content: "";
