@@ -362,7 +362,7 @@ var Game = (function(){
 	function newTopResult(time) {
 		return {
 			time: time,
-			date: new Date().toLocaleDateString()
+			date: (new Date()).toISOString().substr(0, 10)
 		}
 	}
 
@@ -388,7 +388,7 @@ var Game = (function(){
 	function showTopResults(current) {
 		if (typeof current === 'undefined') current = -1;
 		var list = $('#topResults ol');
-		var i, item;
+		var i, item, topDate;
 		list.empty();
 		for (i = 0; i < _topResults.length; i++) {
 			item = $('<li>');
@@ -532,11 +532,16 @@ var Game = (function(){
 		$('.card', _board).remove();
 		_player = null;
 		$('.player-area').removeClass('clicked winner');
+		var columnRemoved = false;
 		$('#gameBoard .column').each(function(index){
 			if (index > config.columns-1) {
 				$(this).remove();
+				columnRemoved = true;
 			}
 		});
+		if (columnRemoved) {
+			onColumnNumberChange();
+		}
 	}
 
     function commandMore() {
