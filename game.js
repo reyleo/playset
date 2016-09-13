@@ -360,9 +360,17 @@ var Game = (function(){
 	}
 
 	function newTopResult(time) {
+		var formatted;
+		if (toLocaleDateStringSupportsLocales()) {
+			formatted = (new Date()).toLocaleDateString(navigator.language, {
+				month: 'numeric', year: 'numeric', day: 'numeric'
+			})
+		} else {
+			formatted = (new Date()).toISOString().substr(0, 10)
+		}
 		return {
 			time: time,
-			date: (new Date()).toISOString().substr(0, 10)
+			date: formatted
 		}
 	}
 
@@ -1242,6 +1250,15 @@ function showDialog(id) {
 }
 function hideDialog(id) {
 	$('#setupDialog').parent().hide();
+}
+
+function toLocaleDateStringSupportsLocales() {
+	try {
+		new Date().toLocaleDateString('i');
+	} catch (e) {
+		return e.name === 'RangeError';
+	}
+	return false;
 }
 
 function storageAvailable() {
