@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.097";
+var version = "0.098";
 
 function Card(p) {
     this.color = p[0];
@@ -322,12 +322,12 @@ var Game = (function(){
 	}
 
     function gameOver() {
-        instruction("Game over!", 'normal', 2000);
 		findWinners();
 		_status = Status.over;
 		_clockTimer.stop();
 		updateTime(_clockTimer);
-		if (_players.length == 1) {
+		// save top result if all cards played
+		if (_players.length == 1 && _cardsLeft > 0) {
 			// get time in msec
 			var time = _clockTimer.getTime();
 			var position = checkTopResult(time);
@@ -336,6 +336,11 @@ var Game = (function(){
 			}
 		}
 		save();
+		if (_cardsLeft == 0) {
+        	instruction("Game over!", 'normal', 2000);
+		} else {
+			instruction("No sets found. Reset game", 'normal', 2000);
+		}
     }
 
 	function findWinners() {
