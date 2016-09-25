@@ -339,7 +339,7 @@ var Game = (function(){
 		if (_cardsLeft == 0) {
         	instruction("Game over!", 'normal', 2000);
 		} else {
-			instruction("No sets found. Reset game", 'normal', 2000);
+			instruction("No sets", 'normal', 2000);
 		}
     }
 
