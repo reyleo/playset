@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.098";
+var version = "0.099";
 
 function Card(p) {
     this.color = p[0];
@@ -327,7 +327,7 @@ var Game = (function(){
 		_clockTimer.stop();
 		updateTime(_clockTimer);
 		// save top result if all cards played
-		if (_players.length == 1 && _cardsLeft > 0) {
+		if (_players.length == 1 && _cardsLeft == 0) {
 			// get time in msec
 			var time = _clockTimer.getTime();
 			var position = checkTopResult(time);
