@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.099";
+var version = "0.100";
 
 function Card(p) {
     this.color = p[0];
@@ -863,12 +863,15 @@ var Game = (function(){
 				playerClass = 'player-right';
 				player.layout = 'vertical';
 				player.position = 'right';
-			} else {
+			}
+			if ( playerClass == "" || 
+					(_players.length == 1 && playerClass == 'player-top')) {
 				area = null;
 				window.setTimeout(setupPlayer, 1000);
-				instruction('Incorrect place. Please try again', 'error');
+				instruction('Incorrect place', 'error');
 				return;
 			}
+
 			if (playerClass != "") {
 				player.class = playerClass;
 				createArea(player);
