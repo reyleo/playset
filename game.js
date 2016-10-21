@@ -179,7 +179,7 @@ var Game = (function(){
 			if (_maximized) {
 				maximize(true);
 			}
-			
+
 			if (_status == Status.over) {
 				findWinners();
 			}
@@ -484,28 +484,19 @@ var Game = (function(){
 	}
 
 	function nextCombination(p, max) {
-		var pos = p.length - 1,
-			pos2;
+        var pos = p.length - 1;
+    
+        while (pos >= 0) {
+            if (p[pos] >= max) {
+                p[pos] = 0;
+                pos--;
+            } else {
+                p[pos] += 1;
+                return true;
+            }
+        }
 
-		if (p[pos] >= max) {
-			p[pos] = 0;
-			pos2 = pos - 1;
-			while (pos2 >= 0) {
-				if (p[pos2] >= max) {
-					p[pos2] = 0;
-					pos2--;
-				} else {
-					p[pos2]+= 1;
-					break;
-				}
-			}
-
-			if (pos2 < 0) return false;
-
-		} else {
-			p[pos] += 1;
-		}
-		return true;
+        return false;
 	}
 
 	function restart() {
@@ -514,8 +505,6 @@ var Game = (function(){
 		_status = Status.active;
 		clear();
 		shuffle();
-		deal();
-        checkForMore();
 		if (!config.keepScore) {
 			resetScore();
 		}
@@ -527,6 +516,8 @@ var Game = (function(){
 			_clockTimer.start();
 			_clockWidget.show();
 		}
+        deal();
+        checkForMore();
 		save();
 	}
 
@@ -816,7 +807,7 @@ var Game = (function(){
 
 	function showMaximize() {
 		var players = document.querySelectorAll('.player-left,.player-right');
-		
+
 		if (players.length == 0) {
 			setMaximizeIcon();
 			$('#maximizeBtn').show();
@@ -864,7 +855,7 @@ var Game = (function(){
 				player.layout = 'vertical';
 				player.position = 'right';
 			}
-			if ( playerClass == "" || 
+			if ( playerClass == "" ||
 					(_players.length == 1 && playerClass == 'player-top')) {
 				area = null;
 				window.setTimeout(setupPlayer, 1000);
@@ -888,7 +879,7 @@ var Game = (function(){
 
     function finishSetup() {
 		$(_board).show();
-		
+
 		if (!showMaximize() && _maximized) {
 			maximize(false);
 		}
@@ -1249,15 +1240,31 @@ function showDialog(id) {
 	var dlg = $(id);
 	dlg.parent().show();
 	var dw = dlg.width();
-	var dh = dlg.height();
-	var position = {
-		top: Math.round((wh - dh)/2),
-		left: Math.round((ww - dw)/2)
+	var dh;
+	var innerHeight = 0;
+	dlg.children().each(function () {
+		innerHeight += this.clientHeight;
+	});
+	dh = innerHeight;
+
+	if (dw > ww) {
+		dw = ww;
 	}
-	dlg.css(position);
+	if (dh > wh) {
+		dh = wh;
+	}
+
+	var css = {
+		top: Math.max(Math.round((wh - dh)/2), 0),
+		left: Math.max(Math.round((ww - dw)/2), 0),
+		height: dh,
+		width: dw
+	}
+
+	dlg.css(css);
 }
 function hideDialog(id) {
-	$('#setupDialog').parent().hide();
+	$(id).parent().hide();
 }
 
 function toLocaleDateStringSupportsLocales() {
