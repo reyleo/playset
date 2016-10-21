@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<link href="widgets.css" rel="stylesheet" type="text/css"/>
+	<style>
+		@keyframes zoom {
+			0% {
+			}
+			10% {
+				top: 50%;
+				margin-top: -18pt;
+				width: 16em;
+				margin-left: -8em;
+			}
+			90% {
+				top: 50%;
+				margin-top: -18pt;
+				width: 16em;
+				margin-left: -8em;
+			}
+			100% {
+			}
+		}
+		.best-time {
+			animation: 5s zoom 1;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="timer" class="game-timer best-time">00:00</div><br>
+	<button id="start">Start</button> <button id="pause">Pause</button> <button id="stop">Stop</button>
+	<script type="text/javascript" src="timer.js"></script>
+	<script type="text/javascript">
+		var clock = document.getElementById('timer');
+		var myTimer = new Timer(updateClock);
+		function updateClock(t) {
+			clock.innerHTML = t.toString();
+		}
+		updateClock(myTimer);
+		var startBtn = document.getElementById('start');
+		var stopBtn = document.getElementById('stop');
+		var pauseBtn = document.getElementById('pause');
+		startBtn.addEventListener('click', function(e) {
+			myTimer.start();
+			console.log('Timer -- start');
+		});	
+		stopBtn.addEventListener('click', function(e) {
+			myTimer.stop();
+			updateClock(myTimer);
+			console.log('Timer -- stop');
+		});	
+		pauseBtn.addEventListener('click', function(e) {
+			myTimer.pause();
+			updateClock(myTimer);
+		});	
+		
+	</script>
+</body>
+</html>
