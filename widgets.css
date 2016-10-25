@@ -29,10 +29,10 @@
 	padding: 6pt 12pt;
 	background: none;
 	overflow: auto;
-	line-height: 18pt;
-	font-size: 12pt;
+	line-height: 24pt;
+	font-size: 16pt;
 	/*height: 100pt;*/
-	
+
 }
 .dialog .dialog-header {
 	float: left;

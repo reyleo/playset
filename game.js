@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.100";
+var version = "0.104";
 
 function Card(p) {
     this.color = p[0];
@@ -485,7 +485,7 @@ var Game = (function(){
 
 	function nextCombination(p, max) {
         var pos = p.length - 1;
-    
+
         while (pos >= 0) {
             if (p[pos] >= max) {
                 p[pos] = 0;
@@ -1050,7 +1050,7 @@ var Game = (function(){
 	}
 
 	function error(msg) {
-		document.getElementById('audio-error').play();
+		//document.getElementById('audio-error').play();
 		$('#errorMessage').parent().show();
 		window.setTimeout(function(){
 				$('#errorMessage').parent().hide();
