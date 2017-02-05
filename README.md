@@ -12,3 +12,5 @@ Features:
 * Timer for single player game
 * Top scores
 * Pause/Resume
+
+![Nexus](images/android.png)
