@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# Version 0.104
+# Version 0.105
 
 CACHE:
 icons/set-icon-192x192.png
@@ -9,9 +9,9 @@ icons/set-icon-256x256.png
 icons/set-icon-384x384.png
 apple-touch-icon.png
 game.html
-game.js
-jquery-3.1.0.min.js
-main.css
+js/game.js
+js/jquery-3.1.0.min.js
+css/main.css
 manifest.json
-timer.js
-widgets.css
+js/timer.js
+css/widgets.css
