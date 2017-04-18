@@ -5,11 +5,11 @@ Works on:
  * iPad
  * Android with modern browser
 
-Optimized for touch interfaces, but works on desktop as well.
+Optimized for touch interfaces, but works on desktops as well.
 
 Features:
 * Up to 6 players
-* Timer for single player game
+* Timer in single player mode
 * Top scores
 * Pause/Resume
 
