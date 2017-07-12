@@ -535,7 +535,7 @@ var Game = (function(){
 		clearTimers();
 		$('.card', _board).remove();
 		_player = null;
-		$('.player-area').removeClass('clicked winner');
+		$('.player-area').removeClass('clicked winner queue');
 		var columnRemoved = false;
 		$('#gameBoard .column').each(function(index){
 			if (index > config.columns-1) {
@@ -670,8 +670,10 @@ var Game = (function(){
 	}
 
 	function setMaximizeIcon() {
+		/*
 		var src = _maximized ? '#icon-minimize' : '#icon-maximize';
 		document.querySelector('#maximizeBtn use').setAttributeNS('http://www.w3.org/1999/xlink', 'href', src);
+		*/
 	}
 
 	function escape() {
@@ -909,32 +911,60 @@ var Game = (function(){
 	}
 
 	function initPlayers() {
-		$('.player-area').on(_eventName, function() {
-			// do not react on user click if game is over
-			debug('Game status = ' + _status);
-			if (_status == Status.over) return;
-			// exit if not first :)
-			var clicked = $(this);
-			var clickedId = clicked.data('player');
+		$('.player-area').on(_eventName, onPlayerAreaClick);
+	}
 
-			if (_player != null) {
-				if (_player.id != clickedId) {
-					_queue.push(_players[clickedId]);
-					clicked.addClass('queue');
-				}
-				return;
+	function onPlayerAreaClick() {
+		// do not react on user click if game is over
+		debug('Game status = ' + _status);
+		if (_status == Status.over) return;
+		// exit if not first :)
+		var clicked = $(this);
+		var clickedId = clicked.data('player');
+
+		if (_player != null) {
+			// current player cannot go to queue
+			if (_player.id != clickedId) {
+				addToQueue(_players[clickedId]);
 			}
-
+		} else {
 			$('#gameMessage').hide();
 			_player = _players[clickedId];
 			clicked.addClass('clicked');
 
-			// Queue
-			_queue = [];
+			// Ensure Queue is empty
+			emptyQueue();
 
 			// Timer
 			startTimer(clicked);
-		});
+		}
+	}
+
+	function emptyQueue() {
+		var i;
+		for (i = 0; i < _queue.length; i++) {
+			_queue[i].area.removeClass('queue');
+		}
+		_queue = [];
+	}
+
+	function addToQueue(player) {
+		var i;
+		for (i = 0; i < _queue.length; i++) {
+			if (_queue[i].id == player.id) return;
+		}
+		_queue.push(player);
+		debug('Player ' + player.id + ' added to queue');
+		player.area.addClass('queue');
+	}
+
+	function nextInQueue() {
+		if (_queue.length > 0) {
+			_player = _queue.shift();
+			debug('Player ' + _player.id + ' taken from queue');
+			_player.area.removeClass('queue').addClass('clicked');
+			startTimer(_player.area);
+		}
 	}
 
 	function startTimer(area) {
@@ -1163,10 +1193,7 @@ var Game = (function(){
 		area.removeClass('clicked');
 		_player = null;
 		// Queue
-		if (_queue.length > 0) {
-			$('.player-area').removeClass('queue');
-            _queue = [];
-		}
+		emptyQueue();
 	}
 
 	function playerFail() {
@@ -1180,11 +1207,7 @@ var Game = (function(){
 		area.removeClass('clicked');
 		_player = null;
 		// Queue
-		if (_queue.length > 0) {
-			_player = _queue.shift();
-			_player.area.removeClass('queue').addClass('clicked');
-			startTimer(_player.area);
-		}
+		nextInQueue();
 		save();
 	}
 
