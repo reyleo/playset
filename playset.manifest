@@ -1,0 +1,17 @@
+CACHE MANIFEST
+
+# Version 0.107
+
+CACHE:
+icons/set-icon-192x192.png
+icons/set-icon-96x96.png
+icons/set-icon-256x256.png
+icons/set-icon-384x384.png
+apple-touch-icon.png
+game.html
+js/game.js
+js/jquery-3.2.1.min.js
+css/main.css
+manifest.json
+js/timer.js
+css/widgets.css
