@@ -784,7 +784,6 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
-		showMaximize();
 		resizeCards();
     }
 
