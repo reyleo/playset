@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.108";
+var version = "0.109";
 
 function Card(p) {
     this.color = p[0];
@@ -76,7 +76,7 @@ var Game = (function(){
 	var _queue = [];
 	var _timer = null;
 	var _countDown;
-	var _maximized = true;
+	var _maximized = false;
 	var _setup = {
 		player: 0,
 		next: false
@@ -160,6 +160,7 @@ var Game = (function(){
 			_next = state.next;
 			_cardsLeft = _deck.length - _next;
 			_status = state.status;
+			_maximized = state.maximized;
 			if (state.topResults) _topResults = state.topResults;
 
 			loadPlayers(state.players);
@@ -175,10 +176,14 @@ var Game = (function(){
 			} else {
 				_clockWidget.hide();
 			}
+			if (_maximized) {
+				maximize(true);
+			}
 
 			if (_status == Status.over) {
 				findWinners();
 			}
+			resize();
 			return true;
 		}
 		return false;
@@ -202,6 +207,7 @@ var Game = (function(){
 			'status': _status,
 			'timer': _clockTimer.getTime(),
 			'board': getBoard(),
+			'maximized': _maximized,
 			'topResults': _topResults
 		};
 		var data = JSON.stringify(state);
@@ -657,9 +663,17 @@ var Game = (function(){
 			css['padding-top'] = defaultPadding;
 		}
 
+		_maximized = on;
+		setMaximizeIcon();
 		$('#gameContainer').css(css);
-		resizeCards();
 
+	}
+
+	function setMaximizeIcon() {
+		/*
+		var src = _maximized ? '#icon-minimize' : '#icon-maximize';
+		document.querySelector('#maximizeBtn use').setAttributeNS('http://www.w3.org/1999/xlink', 'href', src);
+		*/
 	}
 
 	function escape() {
@@ -784,8 +798,31 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
+		autoMaximize();
 		resizeCards();
     }
+
+	function autoMaximize() {
+		maximize(canMaximize());
+	}
+
+	function canMaximize() {
+		var players = document.querySelectorAll('.player-left,.player-right');
+		return (players.length == 0);
+	}
+
+	function showMaximize() {
+		var players = document.querySelectorAll('.player-left,.player-right');
+
+		if (players.length == 0) {
+			setMaximizeIcon();
+			$('#maximizeBtn').show();
+			return true;
+		} else {
+			$('#maximizeBtn').hide();
+			return false
+		}
+	}
 
 	function setup() {
 		showDialog('#setupDialog');
@@ -848,6 +885,9 @@ var Game = (function(){
 
     function finishSetup() {
 		$(_board).show();
+
+		autoMaximize();
+		resize();
 
         $('#gameMessage').hide();
         initPlayers();
