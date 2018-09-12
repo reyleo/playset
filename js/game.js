@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.109";
+var version = "0.110";
 
 function Card(p) {
     this.color = p[0];
@@ -160,7 +160,6 @@ var Game = (function(){
 			_next = state.next;
 			_cardsLeft = _deck.length - _next;
 			_status = state.status;
-			_maximized = state.maximized;
 			if (state.topResults) _topResults = state.topResults;
 
 			loadPlayers(state.players);
@@ -176,9 +175,9 @@ var Game = (function(){
 			} else {
 				_clockWidget.hide();
 			}
-			if (_maximized) {
-				maximize(true);
-			}
+
+			maximize();
+
 
 			if (_status == Status.over) {
 				findWinners();
@@ -643,28 +642,24 @@ var Game = (function(){
 
 	}
 
-	function maximize(on) {
-		var on = (typeof on === 'undefined') ? !_maximized : on;
-		var property = 'padding-' + _players[0].position;
+	function maximize() {
+		var property;
 		var defaultPadding = '36pt';
-		var padding = defaultPadding;
+		var padding = '0';
 
-		if (on) {
-			padding = '0';
-		}
 		var css = {
-			'padding-top':    padding,
+			'padding-top':    defaultPadding,
 			'padding-right':  padding,
 			'padding-bottom': padding,
 			'padding-left':   padding
 		};
-		if (on) {
+		for (let i = 0; i < _players.length; i++) {
+			property = 'padding-' + _players[i].position;
 			css[property] = defaultPadding;
-			css['padding-top'] = defaultPadding;
 		}
 
-		_maximized = on;
-		setMaximizeIcon();
+		_maximized = true;
+		//setMaximizeIcon();
 		$('#gameContainer').css(css);
 
 	}
@@ -798,31 +793,9 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
-		autoMaximize();
+		maximize();
 		resizeCards();
     }
-
-	function autoMaximize() {
-		maximize(canMaximize());
-	}
-
-	function canMaximize() {
-		var players = document.querySelectorAll('.player-left,.player-right');
-		return (players.length == 0);
-	}
-
-	function showMaximize() {
-		var players = document.querySelectorAll('.player-left,.player-right');
-
-		if (players.length == 0) {
-			setMaximizeIcon();
-			$('#maximizeBtn').show();
-			return true;
-		} else {
-			$('#maximizeBtn').hide();
-			return false
-		}
-	}
 
 	function setup() {
 		showDialog('#setupDialog');
@@ -886,7 +859,7 @@ var Game = (function(){
     function finishSetup() {
 		$(_board).show();
 
-		autoMaximize();
+		maximize();
 		resize();
 
         $('#gameMessage').hide();
