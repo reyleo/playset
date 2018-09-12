@@ -881,6 +881,7 @@ var Game = (function(){
 		// do not react on user click if game is over
 		debug('Game status = ' + _status);
 		if (_status == Status.over) return;
+		if (_players.length == 1) return;
 		// exit if not first :)
 		var clicked = $(this);
 		var clickedId = clicked.data('player');
