@@ -160,7 +160,6 @@ var Game = (function(){
 			_next = state.next;
 			_cardsLeft = _deck.length - _next;
 			_status = state.status;
-			_maximized = state.maximized;
 			if (state.topResults) _topResults = state.topResults;
 
 			loadPlayers(state.players);
@@ -175,9 +174,6 @@ var Game = (function(){
 				_clockWidget.show();
 			} else {
 				_clockWidget.hide();
-			}
-			if (_maximized) {
-				maximize(true);
 			}
 
 			if (_status == Status.over) {
@@ -206,7 +202,6 @@ var Game = (function(){
 			'status': _status,
 			'timer': _clockTimer.getTime(),
 			'board': getBoard(),
-			'maximized': _maximized,
 			'topResults': _topResults
 		};
 		var data = JSON.stringify(state);
@@ -662,18 +657,9 @@ var Game = (function(){
 			css['padding-top'] = defaultPadding;
 		}
 
-		_maximized = on;
-		setMaximizeIcon();
 		$('#gameContainer').css(css);
 		resizeCards();
 
-	}
-
-	function setMaximizeIcon() {
-		/*
-		var src = _maximized ? '#icon-minimize' : '#icon-maximize';
-		document.querySelector('#maximizeBtn use').setAttributeNS('http://www.w3.org/1999/xlink', 'href', src);
-		*/
 	}
 
 	function escape() {
@@ -777,11 +763,6 @@ var Game = (function(){
 			clearTopResults();
 		});
 
-		$('#maximizeBtn').on(_eventName, function() {
-			maximize();
-			save();
-		});
-
 		window.addEventListener('unload', escape);
 		window.addEventListener('pagehide', escape);
 		window.addEventListener('beforeunload', escape);
@@ -806,19 +787,6 @@ var Game = (function(){
 		showMaximize();
 		resizeCards();
     }
-
-	function showMaximize() {
-		var players = document.querySelectorAll('.player-left,.player-right');
-
-		if (players.length == 0) {
-			setMaximizeIcon();
-			$('#maximizeBtn').show();
-			return true;
-		} else {
-			$('#maximizeBtn').hide();
-			return false
-		}
-	}
 
 	function setup() {
 		showDialog('#setupDialog');
@@ -881,10 +849,6 @@ var Game = (function(){
 
     function finishSetup() {
 		$(_board).show();
-
-		if (!showMaximize() && _maximized) {
-			maximize(false);
-		}
 
         $('#gameMessage').hide();
         initPlayers();
