@@ -9,8 +9,8 @@ Optimized for touch interfaces, but works on desktops as well.
 
 Features:
 * Up to 6 players
-* Timer in single player mode
+* Timer in the single player mode
 * Top scores
-* Pause/Resume
+* Pause/resume
 
 ![Nexus](images/android.png)
