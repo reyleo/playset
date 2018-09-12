@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.106";
+var version = "0.107";
 
 function Card(p) {
     this.color = p[0];
@@ -76,7 +76,7 @@ var Game = (function(){
 	var _queue = [];
 	var _timer = null;
 	var _countDown;
-	var _maximized = false;
+	var _maximized = true;
 	var _setup = {
 		player: 0,
 		next: false
