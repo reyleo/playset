@@ -1276,21 +1276,10 @@ function storageAvailable() {
 	}
 }
 
-function updateReady() {
-    alert("Update available!");
-    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-        window.location.reload();
-    }
-    //alert("Version " + version + " installed");
-}
 /**
  * Document ready
  */
 $(function(){
-
-    if (window.applicationCache) {
-        window.applicationCache.addEventListener('updateready', updateReady, false);
-    }
 
 
 	var eventName = 'click';
