@@ -187,11 +187,13 @@ var Game = (function(){
 		}
 		return false;
 	}
+
 	function saveTime(timer) {
 		if (_isStorageAvailable) {
 			localStorage.setItem('time', timer.getTime());
 		}
 	}
+
 	function save() {
 		if (!_isStorageAvailable) return;
 		var deckArr = [], i;
@@ -216,16 +218,12 @@ var Game = (function(){
 	}
 
 	function savePlayers() {
-		var save = [], p, newObj;
-		for (var i = 0; i < _players.length; i++) {
-			p = _players[i];
-			newObj = {};
-			for (var k in p) {
-				newObj[k] = p[k];
-			}
+		var save = [];
+		_players.forEach( player => {
+			var newObj = Object.assign({}, player);
 			if (newObj.area) newObj.area = null;
 			save.push(newObj);
-		}
+		});
 		return save;
 	}
 
@@ -271,7 +269,7 @@ var Game = (function(){
 		var elem, card, count = 0;
 
 		// remove animation
-		var an = cards().filter('.animate').removeClass('animate');
+		cards().filter('.animate').removeClass('animate');
 
 		for (var i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
