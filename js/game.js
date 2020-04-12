@@ -28,7 +28,6 @@ Card.prototype._colors = ["red", "green", "purple"];
 Card.prototype._fills = ["empty", "filled", "stripes"];
 
 Card.prototype.render = function(cardElem) {
-	var svg, symbol;
 	if (cardElem != null) {
 		if (cardElem.hasChildNodes()) {
 			cardElem.removeChild(cardElem.firstChild);
@@ -37,28 +36,22 @@ Card.prototype.render = function(cardElem) {
 		var group = document.createElement('div');
 		group.className = 'group' + " group" + this.quantity;
 		for (var i = 0; i < this.quantity; i++) {
-			svg = document.createElementNS(svgNS, "svg");
-			svg.setAttribute('class', "symbol");
-			svg.setAttribute('viewBox','0 0 200 100');
-			svg.style.width = "100%";
-			//svg.setAttributeNS("http://www.w3.org/2000/xmlns", "xlink", "http://www.w3.org/1999/xlink");
-
-			symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
-			symbol.removeAttribute('id');
-			/*
-			symbol = document.createElementNS(svgNS, "use");
-			symbol.setAttribute('x', '0');
-			symbol.setAttribute('y', '0');
-			symbol.setAttributeNS(xlinkNS, 'href', "#" + this._shapes[this.shape]);
-			*/
-			symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
-
-
-			svg.appendChild(symbol);
-			group.appendChild(svg);
+			group.appendChild(this.createSymbol());
 		}
 		cardElem.appendChild(group);
 	}
+};
+Card.prototype.createSymbol = function() {
+	svg = document.createElementNS(svgNS, "svg");
+	svg.setAttribute('class', "symbol");
+	svg.setAttribute('viewBox','0 0 200 100');
+	svg.style.width = "100%";
+
+	symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
+	symbol.removeAttribute('id');
+	symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
+	svg.appendChild(symbol);
+	return svg;
 };
 
 
@@ -118,8 +111,12 @@ var Game = (function(){
 		//saveTime(timer);
 	}
 
-	function isTimerOn() {
+	function isSinglePlayer() {
 		return _players.length == 1;
+	}
+
+	function isTimerOn() {
+		return isSinglePlayer();
 	}
 
 	function showTime () {
@@ -164,7 +161,7 @@ var Game = (function(){
 
 			loadPlayers(state.players);
 			fillBoard(state.board);
-			if (_players.length == 1) {
+			if (isSinglePlayer()) {
 				if (_status == Status.active) {
 					_clockTimer.start(state.timer);
 				} else {
@@ -196,10 +193,9 @@ var Game = (function(){
 
 	function save() {
 		if (!_isStorageAvailable) return;
-		var deckArr = [], i;
-		for (i = 0; i < _deck.length; i++) {
-			deckArr.push(_deck[i].toArray());
-		}
+
+		var deckArr = _deck.map((card) => card.toArray());
+
 		var state = {
 			'version': version,
 			'deck': deckArr,
@@ -217,14 +213,14 @@ var Game = (function(){
 		//saveTime(_clockTimer);
 	}
 
+	function copyPlayer(player) {
+		var newObj = Object.assign({}, player);
+		if (newObj.area) newObj.area = null;
+		return newObj;
+	}
+
 	function savePlayers() {
-		var save = [];
-		_players.forEach( player => {
-			var newObj = Object.assign({}, player);
-			if (newObj.area) newObj.area = null;
-			save.push(newObj);
-		});
-		return save;
+		return _players.map(copyPlayer);
 	}
 
 	function loadPlayers(players) {
@@ -240,11 +236,7 @@ var Game = (function(){
 		var board = [];
 		$('.cardHolder', _board).each(function() {
 			var cardElem = this.querySelector('.card');
-			if (cardElem != null) {
-				board.push(cardElem.card.toArray());
-			} else {
-				board.push(null);
-			}
+			board.push(cardElem !== null? cardElem.card.toArray() : null);
 		});
 		return board;
 	}
@@ -325,7 +317,7 @@ var Game = (function(){
 		_clockTimer.stop();
 		updateTime(_clockTimer);
 		// save top result if all cards played
-		if (_players.length == 1 && _cardsLeft == 0) {
+		if (isSinglePlayer() && _cardsLeft == 0) {
 			// get time in msec
 			var time = _clockTimer.getTime();
 			var position = checkTopResult(time);
@@ -337,17 +329,16 @@ var Game = (function(){
 		if (_cardsLeft == 0) {
         	instruction("Game over!", 'normal', 2000);
 		} else {
-			instruction("No sets", 'normal', 2000);
+			instruction("No more sets", 'normal', 2000);
 		}
     }
 
 	function findWinners() {
         var winners = [];
         var maxPoints = -999;
-        var player, points, i;
-        for (i = 0; i < _players.length; i++) {
-            player = _players[i];
-            points = player.wins - player.fails;
+
+        _players.forEach( function(player) {
+            var points = player.wins - player.fails;
             if (points == maxPoints) {
                 winners.push(player);
             } else if (points > maxPoints) {
@@ -355,7 +346,7 @@ var Game = (function(){
                 winners.push(player);
                 maxPoints = points;
             }
-        }
+        });
         debug("Max points " + maxPoints + ", winners = " + winners.length);
         for (i = 0; i < winners.length; i++) {
             winners[i].area.addClass('winner');
@@ -401,15 +392,15 @@ var Game = (function(){
 		var list = $('#topResults ol');
 		var i, item, topDate;
 		list.empty();
-		for (i = 0; i < _topResults.length; i++) {
+		_topResults.forEach( function(_top) {
 			item = $('<li>');
-			item.html(Timer.formatTime(_topResults[i].time));
-			item.append('<span class="date">' + _topResults[i].date + '</span>');
+			item.html(Timer.formatTime(_top.time));
+			item.append('<span class="date">' + _top.date + '</span>');
 			if (current == i) {
 				item.addClass('current');
 			}
 			list.append(item);
-		}
+		});
 		showDialog('#topResults');
 	}
 
@@ -792,7 +783,7 @@ var Game = (function(){
 			restart();
 		}
 		maximize();
-		resizeCards();
+		resize();
     }
 
 	function setup() {
@@ -833,7 +824,7 @@ var Game = (function(){
 				player.position = 'right';
 			}
 			if ( playerClass == "" ||
-					(_players.length == 1 && playerClass == 'player-top')) {
+					(isSinglePlayer() && playerClass == 'player-top')) {
 				area = null;
 				window.setTimeout(setupPlayer, 1000);
 				instruction('Incorrect place', 'error');
@@ -892,7 +883,7 @@ var Game = (function(){
 		// do not react on user click if game is over
 		debug('Game status = ' + _status);
 		if (_status == Status.over) return;
-		if (_players.length == 1) return;
+		if (isSinglePlayer()) return;
 		// exit if not first :)
 		var clicked = $(this);
 		var clickedId = clicked.data('player');
