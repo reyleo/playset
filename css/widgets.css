@@ -19,9 +19,9 @@
 	z-index: 501;
 }
 #setupDialog {
-	background-color: #fff;
-	color: #222;
-	border: 1px solid #EEE;
+	background-color: #333;
+	color: #eee;
+	border: 1px solid #222;
 }
 .dialog-content {
 	position: relative;
@@ -61,7 +61,7 @@
 	background: transparent;
 }
 .dialog .close:hover {
-	fill: #aaa;
+	background-color: #cc3300;
 }
 svg.icon {
 	width: 100%;
@@ -87,7 +87,6 @@ svg.icon {
 }
 #gameInfo {
 	text-align: center;
-	color: #ccc;
 	font-size: .6em;
 	line-height: 24pt;
 	margin-left: 1em;
@@ -102,12 +101,12 @@ svg.icon {
 	width: 22pt;
 	height: 22pt;
 	border: 1px solid #666;
-	background-color: #FFF;
-
+	border-radius: 3px;
+	background-color: #555;
 	float: left;
 }
 .check-off {
-	fill: #F0F0F0;
+	fill: #666;
 }
 .check-on {
 	fill: #0c0;
@@ -248,7 +247,7 @@ svg.icon {
 	background-color: #333;
 	color: #eee;
 	border: 1px solid #222;
-	width: 90%;
+	min-width: 30em;
 	height: 360pt;
 }
 #topResults ol {
