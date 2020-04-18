@@ -390,13 +390,12 @@ var Game = (function(){
 	function showTopResults(current) {
 		if (typeof current === 'undefined') current = -1;
 		var list = $('#topResults ol');
-		var i, item, topDate;
 		list.empty();
-		_topResults.forEach( function(_top) {
-			item = $('<li>');
+		_topResults.forEach( function(_top, index) {
+			var item = $('<li>');
 			item.html(Timer.formatTime(_top.time));
 			item.append('<span class="date">' + _top.date + '</span>');
-			if (current == i) {
+			if (current == index) {
 				item.addClass('current');
 			}
 			list.append(item);
