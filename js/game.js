@@ -69,7 +69,6 @@ var Game = (function(){
 	var _queue = [];
 	var _timer = null;
 	var _countDown;
-	var _maximized = false;
 	var _setup = {
 		player: 0,
 		next: false
@@ -200,7 +199,6 @@ var Game = (function(){
 			'status': _status,
 			'timer': _clockTimer.getTime(),
 			'board': getBoard(),
-			'maximized': _maximized,
 			'topResults': _topResults
 		};
 		var data = JSON.stringify(state);
@@ -564,7 +562,7 @@ var Game = (function(){
 		var h1 = Math.floor($(_board).height() * 0.9 / 3);
 		var boardWidth = $(_board).width();
 		var colCount = $('.column', _board).length;
-		var colWidth = (!_maximized || colCount == 5) ? 0.18 : 0.23;
+		var colWidth = colCount == 5 ? 0.18 : 0.23;
 		var w2 = Math.floor(boardWidth * colWidth);
 		//var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
@@ -604,7 +602,7 @@ var Game = (function(){
 	}
 
 	function onColumnNumberChange() {
-		if (_maximized) resizeCards();
+		resizeCards();
 	}
 
 	function resizeCards() {
@@ -642,17 +640,8 @@ var Game = (function(){
 			css[property] = defaultPadding;
 		}
 
-		_maximized = true;
-		//setMaximizeIcon();
 		$('#gameContainer').css(css);
 
-	}
-
-	function setMaximizeIcon() {
-		/*
-		var src = _maximized ? '#icon-minimize' : '#icon-maximize';
-		document.querySelector('#maximizeBtn use').setAttributeNS('http://www.w3.org/1999/xlink', 'href', src);
-		*/
 	}
 
 	function escape() {
