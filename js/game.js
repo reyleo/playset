@@ -618,8 +618,8 @@ var Game = (function(){
 			'margin-right': '' + colMargin + 'px',
 			'margin-left': '' + colMargin + 'px',
 		});
-
-		var realWidth = (config.cardWidth + colMargin * 2) * config.columns;
+		var colCount = document.querySelectorAll('.column').length;
+		var realWidth = (config.cardWidth + colMargin * 2) * colCount;
 		$('#columns').width(realWidth);
 	}
 
