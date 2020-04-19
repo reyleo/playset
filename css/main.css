@@ -25,11 +25,13 @@
 		box-sizing: border-box;
 		background-color: #eeeded;
 	}
+	#columns {
+		width: auto;
+		margin-right: auto;
+		margin-left: auto;
+	}
 	#gameBoard .column {
 		display: inline-block;
-		width: 18%;
-		margin-left: 1%;
-		margin-right: 1%;
 	}
 	#gameBoard .cardHolder {
 		width: 100%;

@@ -555,7 +555,7 @@ var Game = (function(){
 			$(cardHolder).css(cardHolderCss());
 			column.appendChild(cardHolder);
 		}
-		_board.appendChild(column);
+		document.getElementById('columns').appendChild(column);
 	}
 
 	function calcHeight() {
@@ -609,7 +609,18 @@ var Game = (function(){
 		calcCardSize();
 		$('.card', _board).css(cardCss());
 		$('.cardHolder', _board).css(cardHolderCss());
-		$('.column', _board).width(config.cardWidth);
+
+		var bw = $(_board).width();
+		var colMargin = bw * 0.01;
+
+		$('.column', _board).css({
+			'width': config.cardWidth,
+			'margin-right': '' + colMargin + 'px',
+			'margin-left': '' + colMargin + 'px',
+		});
+
+		var realWidth = (config.cardWidth + colMargin * 2) * config.columns;
+		$('#columns').width(realWidth);
 	}
 
 	function resize() {
