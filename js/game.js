@@ -173,13 +173,9 @@ var Game = (function(){
 				_clockWidget.hide();
 			}
 
-			maximize();
-
-
 			if (_status == Status.over) {
 				findWinners();
 			}
-			resize();
 			return true;
 		}
 		return false;
