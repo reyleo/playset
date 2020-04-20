@@ -54,6 +54,45 @@ Card.prototype.createSymbol = function() {
 	return svg;
 };
 
+Player.prototype.points = function() {
+	return this.wins - this.fails;
+};
+
+Player.prototype.isValid = function() {
+	return this.class !== '' && typeof this.id !== undefined;
+};
+
+Player.prototype.isTopPosition = function() {
+	return this.class === 'player-top';
+}
+
+Player.prototype.setPosition = function(position) {
+	if (position === 'top' || position === 'bottom') {
+		this.layout = 'horizontal';
+	} else if (position === 'right' || position === 'left') {
+		this.layout = 'vertical';
+	} else {
+		player.class = '';
+		return;
+	}
+	this.position = position;
+	this.class = 'player-' + position;
+};
+
+function Player(id) {
+
+	if (!(this instanceof Player)) {
+		return new Player(id);
+	}
+	this.id = id;
+	this.name = "";
+	this.wins = 0;
+	this.fails = 0;
+	this.layout = '';
+	this.class = '';
+	this.position = '';
+	this.area = null;
+}
 
 var Status = {active: 0, pause: 1, over: 2};
 
@@ -133,22 +172,10 @@ var Game = (function(){
 	function load() {
 		if (!_isStorageAvailable) return false;
 		var data = localStorage.getItem('data');
-		var timeValue = 0;
-		/*
-		var timeStr = localStorage.getItem('time');
-		if (timeStr) {
-			timeValue = parseInt(timeStr);
-		}
-		*/
+
 		if (data && data.length > 0) {
 			var state = JSON.parse(data);
 			debug('Data loaded: ' + data);
-			/*
-			if (state.version != version) {
-				debug('Data from previous version');
-				return false;
-			}
-			*/
 			_deck = [];
 			for (var i = 0; i < state.deck.length; i++) {
 				_deck.push(new Card(state.deck[i]));
@@ -220,8 +247,9 @@ var Game = (function(){
 	function loadPlayers(players) {
 		_players = [];
 		for (var i = 0; i < players.length; i++) {
-			createArea(players[i]);
-			_players.push(players[i]);
+			var newPlayer = Object.assign(Player(), players[i]);
+			createArea(newPlayer);
+			_players.push(newPlayer);
 		}
 		initPlayers();
 	}
@@ -768,9 +796,7 @@ var Game = (function(){
 
 			// create 1 player
 			createPlayers(1);
-			_players[0].layout = 'horizontal';
-			_players[0].class = "player-bottom";
-			_players[0].position = "bottom";
+			_players[0].setPosition('bottom');
 			createArea(_players[0]);
 			initPlayers();
 
@@ -792,7 +818,7 @@ var Game = (function(){
 	}
 
 	function setupPlayer() {
-		instruction('Click on player area');
+		instruction('Select area for player ' + (_setup.player + 1));
 		var player = _players[_setup.player];
 		$(document).one(_eventName, function(event){
 			var wh = window.innerHeight;
@@ -802,32 +828,23 @@ var Game = (function(){
 			var clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
 			var clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
 			if (clickY < boardPadding) {
-				playerClass = 'player-top';
-				player.layout = 'horizontal';
-				player.position = 'top';
+				player.setPosition('top');
 			} else if (clickY > (wh - boardPadding)) {
-				playerClass = 'player-bottom';
-				player.layout = 'horizontal';
-				player.position = 'bottom';
+				player.setPosition('bottom');
 			} else if (clickX < boardPadding) {
-				playerClass = 'player-left';
-				player.layout = 'vertical';
-				player.position = 'left';
+				player.setPosition('left');
 			} else if (clickX > (ww - boardPadding)) {
-				playerClass = 'player-right';
-				player.layout = 'vertical';
-				player.position = 'right';
+				player.setPosition('right');
 			}
-			if ( playerClass == "" ||
-					(isSinglePlayer() && playerClass == 'player-top')) {
+			if (!player.isValid() ||
+					(isSinglePlayer() && player.isTopPosition())) {
 				area = null;
 				window.setTimeout(setupPlayer, 1000);
 				instruction('Incorrect place', 'error');
 				return;
 			}
 
-			if (playerClass != "") {
-				player.class = playerClass;
+			if (player.isValid()) {
 				createArea(player);
 				if (_setup.next && _setup.player < _players.length-1) {
 					_setup.player++;
@@ -991,26 +1008,12 @@ var Game = (function(){
 	function createPlayers(count) {
 		_players = [];
 		$('.player-area').remove();
-		for (var i = 0; i < count; i++) {
-			_players.push({
-				id: i,
-				name: "",
-				wins: 0,
-				fails: 0,
-				layout: '',
-				class: '',
-				position: '',
-				area: null
-			});
+		for (var id = 0; id < count; id++) {
+			_players.push(Player(id));
 		}
-		/*
-		if (count == 1) {
-			$(_board).show();
-			return;
-		}
-		*/
-
 	}
+
+
 	function instruction (html, style, msec) {
 		var my = style || 'normal';
 		var delay = (typeof msec == "number")? msec : 0;
@@ -1021,9 +1024,11 @@ var Game = (function(){
 			window.setTimeout(instructionOff, delay);
 		}
 	}
+
 	function instructionOff() {
 		$('#gameMessage').hide();
 	}
+
 	function checkSet(selection) {
 		if (selection.length < 3) return false;
 		var c1 = selection[0].card;

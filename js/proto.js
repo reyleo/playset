@@ -1,4 +1,8 @@
 function Player(id) {
+
+    if (!(this instanceof Player)) {
+        return new Player(id);
+    }
     this.id = id;
     this.name = "";
     this.wins = 0;
@@ -7,6 +11,7 @@ function Player(id) {
     this.class = '';
     this.position = '';
     this.area = null;
+
 }
 Player.prototype.points = function() {
     return this.wins - this.fails;
@@ -27,5 +32,8 @@ var obj = {
 }
 
 var loaded = loadPlayer(obj);
+var created = Player(1222);
 console.log(loaded);
 console.log('Player %s has %d points', loaded.name, loaded.points());
+console.log('\nCreated: ');
+console.log(created);
