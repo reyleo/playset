@@ -656,11 +656,7 @@ var Game = (function(){
 		if (config.cardHeight != newHeight) {
 			resizeCards();
 		}
-		resizePlayers('player-top');
-		resizePlayers('player-bottom');
-		resizePlayers('player-right');
-		resizePlayers('player-left');
-
+		['top','bottom','right','left'].forEach((side) => resizePlayers('player-'+side));
 	}
 
 	function maximize() {
