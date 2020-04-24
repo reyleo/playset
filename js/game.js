@@ -732,7 +732,7 @@ var Game = (function(){
 		}
 
 		_counter = document.getElementById('counter');
-		_clockWidget = $('<div>').addClass('game-timer');
+		_clockWidget = $('<div>').addClass('game-timer noselect');
 		_clockWidget.appendTo($('body')).hide();
 		_clockWidget.on(_eventName, clickPause);
 
@@ -865,7 +865,7 @@ var Game = (function(){
     }
 
 	function createArea(player) {
-		var area = $('<div class="player-area"></div>');
+		var area = $('<div class="player-area noselect"></div>');
 		var contents = $('<div class="player-contents"></div');
 		area.addClass(player.class).appendTo($('body'));
 		resizePlayers(player.class);
