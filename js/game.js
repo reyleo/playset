@@ -1,6 +1,8 @@
 var _Game = (function($){
 
 var version = "0.110";
+var svgNS = "http://www.w3.org/2000/svg";
+var xlinkNS = "http://www.w3.org/1999/xlink";
 
 function Card(p) {
     this.color = p[0];
@@ -8,7 +10,6 @@ function Card(p) {
     this.quantity = p[2] + 1;
     this.fill = p[3];
 }
-
 Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 }
@@ -20,9 +21,6 @@ Card.prototype.toArray = function() {
 	p[3] = this.fill;
 	return p;
 }
-
-var svgNS = "http://www.w3.org/2000/svg";
-var xlinkNS = "http://www.w3.org/1999/xlink";
 Card.prototype._shapes = ["pill", "curve", "rhomb"];
 Card.prototype._colors = ["red", "green", "purple"];
 Card.prototype._fills = ["empty", "filled", "stripes"];
@@ -94,7 +92,7 @@ function Player(id) {
 	this.area = null;
 }
 
-var Status = {active: 0, pause: 1, over: 2};
+const Status = {active: 0, pause: 1, over: 2};
 
 var Game = (function(){
 
@@ -360,19 +358,16 @@ var Game = (function(){
         var maxPoints = -999;
 
         _players.forEach( function(player) {
-            var points = player.wins - player.fails;
+            var points = player.points();
             if (points == maxPoints) {
                 winners.push(player);
             } else if (points > maxPoints) {
-                winners = [];
-                winners.push(player);
+                winners = [player];
                 maxPoints = points;
             }
         });
-        debug("Max points " + maxPoints + ", winners = " + winners.length);
-        for (i = 0; i < winners.length; i++) {
-            winners[i].area.addClass('winner');
-        }
+		//debug("Max points " + maxPoints + ", winners = " + winners.length);
+		winners.forEach((p) => p.area.addClass('winner'));
 	}
 
 	function newTopResult(time) {
@@ -1126,7 +1121,8 @@ var Game = (function(){
 
 		save();
 	}
-    function autoPlay() {
+    function autoPlay(delay) {
+		if (typeof delay === 'undefined') delay = 500;
         var set;
 
         set = findSet();
@@ -1134,17 +1130,16 @@ var Game = (function(){
             $(set).addClass('selected');
 
             // select random player
-            var max = _players.length;
-            var index = Math.floor(Math.random() * max);
+            var index = Math.floor(Math.random() * _players.length);
             _player = _players[index];
             checkSelection();
-            window.setTimeout(autoPlay, 500);
+            window.setTimeout(() => autoPlay(delay), delay);
         }
         return true;
     }
 
 	function playerWins() {
-		if (_players.length < 2) {
+		if (isSinglePlayer()) {
 			_player = _players[0];
 		}
 		if (_player == null) return;
@@ -1159,10 +1154,11 @@ var Game = (function(){
 	}
 
 	function playerFail() {
-		if (_players.length < 2) {
+		if (isSinglePlayer()) {
 			_player = _players[0];
 		}
 		if (_player == null) return;
+
 		_player.fails++;
 		var area = _player.area;
 		area.find('.fail-counter').html(_player.fails);
@@ -1239,15 +1235,14 @@ function showDialog(id) {
 		dh = wh;
 	}
 
-	var css = {
+	dlg.css({
 		top: Math.max(Math.round((wh - dh)/2), 0),
 		left: Math.max(Math.round((ww - dw)/2), 0),
 		height: dh,
 		width: dw
-	}
-
-	dlg.css(css);
+	});
 }
+
 function hideDialog(id) {
 	$(id).parent().hide();
 }
