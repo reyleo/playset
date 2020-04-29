@@ -1,6 +1,6 @@
 var _Game = (function($){
 
-var version = "0.110";
+var version = "0.111";
 var svgNS = "http://www.w3.org/2000/svg";
 var xlinkNS = "http://www.w3.org/1999/xlink";
 
@@ -242,13 +242,14 @@ var Game = (function(){
 		return _players.map(copyPlayer);
 	}
 
+	function buildPlayerWithArea(playerData) {
+		var newPlayer = Object.assign(new Player(), playerData);
+		createArea(newPlayer);
+		return newPlayer;
+	}
+
 	function loadPlayers(players) {
-		_players = [];
-		for (var i = 0; i < players.length; i++) {
-			var newPlayer = Object.assign(Player(), players[i]);
-			createArea(newPlayer);
-			_players.push(newPlayer);
-		}
+		_players = players.map(buildPlayerWithArea);
 		initPlayers();
 	}
 
@@ -884,7 +885,7 @@ var Game = (function(){
 
 	function onPlayerAreaClick() {
 		// do not react on user click if game is over
-		debug('Game status = ' + _status);
+		// debug('Game status = ' + _status);
 		if (_status == Status.over) return;
 		if (isSinglePlayer()) return;
 		// exit if not first :)
@@ -910,18 +911,13 @@ var Game = (function(){
 	}
 
 	function emptyQueue() {
-		var i;
-		for (i = 0; i < _queue.length; i++) {
-			_queue[i].area.removeClass('queue');
-		}
+		if (_queue.length == 0) return;
+		_queue.forEach(player => player.area.removeClass('queue'));
 		_queue = [];
 	}
 
 	function addToQueue(player) {
-		var i;
-		for (i = 0; i < _queue.length; i++) {
-			if (_queue[i].id == player.id) return;
-		}
+		if (_queue.some(p => p.id === player.id)) return;
 		_queue.push(player);
 		debug('Player ' + player.id + ' added to queue');
 		player.area.addClass('queue');
@@ -1178,7 +1174,9 @@ var Game = (function(){
 		resize: resize,
         autoPlay: autoPlay,
 		topResults: showTopResults,
-		maximize: maximize
+		maximize: maximize,
+		version: function () {return version; },
+		debugOn: function() { _debug = true; }
     };
 })();
 
