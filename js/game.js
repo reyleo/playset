@@ -4,7 +4,6 @@ var version = "0.111";
 var svgNS = "http://www.w3.org/2000/svg";
 var xlinkNS = "http://www.w3.org/1999/xlink";
 
-
 function Card(p) {
     this.color = p[0];
     this.shape = p[1];
@@ -32,47 +31,25 @@ Card.prototype.render = function(cardElem) {
 			cardElem.removeChild(cardElem.firstChild);
 		}
 
-		let group = document.createElement('div');
+		var group = document.createElement('div');
 		group.className = 'group' + " group" + this.quantity;
-		for (let i = 0; i < this.quantity; i++) {
+		for (var i = 0; i < this.quantity; i++) {
 			group.appendChild(this.createSymbol());
 		}
 		cardElem.appendChild(group);
 	}
 };
-
 Card.prototype.createSymbol = function() {
-	let svg = document.createElementNS(svgNS, "svg");
+	svg = document.createElementNS(svgNS, "svg");
 	svg.setAttribute('class', "symbol");
 	svg.setAttribute('viewBox','0 0 200 100');
 	svg.style.width = "100%";
 
-	let symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
+	symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
 	symbol.removeAttribute('id');
 	symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
 	svg.appendChild(symbol);
 	return svg;
-};
-
-
-function Player(id) {
-
-	if (!(this instanceof Player)) {
-		return new Player(id);
-	}
-	this.id = id;
-	this.name = "";
-	this.wins = 0;
-	this.fails = 0;
-	this.layout = '';
-	this.class = '';
-	this.position = '';
-	this.area = null;
-}
-
-Player.prototype.resetScore = function() {
-	this.wins = 0;
-	this.fails = 0;
 };
 
 Player.prototype.points = function() {
@@ -100,8 +77,22 @@ Player.prototype.setPosition = function(position) {
 	this.class = 'player-' + position;
 };
 
+function Player(id) {
 
-const Status = { active: 0, pause: 1, over: 2 };
+	if (!(this instanceof Player)) {
+		return new Player(id);
+	}
+	this.id = id;
+	this.name = "";
+	this.wins = 0;
+	this.fails = 0;
+	this.layout = '';
+	this.class = '';
+	this.position = '';
+	this.area = null;
+}
+
+const Status = {active: 0, pause: 1, over: 2};
 
 var Game = (function(){
 
@@ -139,19 +130,18 @@ var Game = (function(){
         showSetOnHint: true
 	};
 	var boardPadding = 0;
-	var _isStorageAvailable = false;
-	var _debug = false;
 
+	var _isStorageAvailable = false;
+
+    var _debug = false;
     var debug = function(str) {
         if (_debug) {
             window.console.log(str);
         }
-	};
-
+    };
 	function isPause() {
 		return _status == Status.pause;
 	}
-
 	function updateTime (timer) {
 		_clockWidget.html(timer.toString());
 		//saveTime(timer);
@@ -538,7 +528,12 @@ var Game = (function(){
 	}
 
 	function resetScore() {
-		_players.forEach((player) => player.resetScore());
+		var p;
+		for (var i = 0; i < _players.length; i++) {
+			p = _players[i];
+			p.wins = 0;
+			p.fails = 0;
+		}
 		$('.win-counter,.fail-counter').html('0');
 	}
 
@@ -613,7 +608,6 @@ var Game = (function(){
 			'margin-bottom': margin
 		};
 	}
-
 	function cardCss() {
 		var r = Math.round(config.cardHeight * 0.06);
 		return {
@@ -738,6 +732,7 @@ var Game = (function(){
 		_clockWidget.appendTo($('body')).hide();
 		_clockWidget.on(_eventName, clickPause);
 
+
 		$(_board).on(_eventName, '.card', function() {
 			onCardSelect(this);
 		});
@@ -820,6 +815,8 @@ var Game = (function(){
 		$(document).one(_eventName, function(event){
 			var wh = window.innerHeight;
 			var ww = window.innerWidth;
+			var area;
+			var playerClass = "";
 			var clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
 			var clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
 			if (clickY < boardPadding) {
@@ -833,6 +830,7 @@ var Game = (function(){
 			}
 			if (!player.isValid() ||
 					(isSinglePlayer() && player.isTopPosition())) {
+				area = null;
 				window.setTimeout(setupPlayer, 1000);
 				instruction('Incorrect place', 'error');
 				return;
@@ -903,8 +901,10 @@ var Game = (function(){
 			$('#gameMessage').hide();
 			_player = _players[clickedId];
 			clicked.addClass('clicked');
+
 			// Ensure Queue is empty
 			emptyQueue();
+
 			// Timer
 			startTimer(clicked);
 		}
@@ -972,13 +972,13 @@ var Game = (function(){
 		var playerCount = same.length;
 		var size = 0, pos = boardPadding;
 		if (playerClass == 'player-top' || playerClass == 'player-bottom') {
-			size = Math.floor((window.innerWidth - boardPadding*2) / playerCount);
+			size = Math.floor((window.innerWidth - boardPadding*2)/playerCount);
 			same.css('width', size).each(function(index){
 				$(this).css('left', pos);
 				pos += size;
 			});
 		} else if (playerClass == 'player-left' || playerClass == 'player-right') {
-			size = Math.floor((window.innerHeight - boardPadding*2) / playerCount);
+			size = Math.floor((window.innerHeight - boardPadding*2)/playerCount);
 			same.css('height', size).each(function(index){
 				$(this).css('top', pos);
 				pos += size;
@@ -999,6 +999,7 @@ var Game = (function(){
 			_players.push(Player(id));
 		}
 	}
+
 
 	function instruction (html, style, msec) {
 		var my = style || 'normal';
@@ -1042,7 +1043,6 @@ var Game = (function(){
 	function cards() {
 		return $('.card', _board);
 	}
-
 	function hint(btn) {
 		var set = findSet();
 
@@ -1057,7 +1057,6 @@ var Game = (function(){
 			//showTooltip($(btn), 'No set found!', 2000);
 		}
 	}
-
 	function onCardSelect(card) {
         if (_selectionDone || _status == Status.over) return;
 		if (_players.length > 1 && _player == null) {
@@ -1118,7 +1117,6 @@ var Game = (function(){
 
 		save();
 	}
-
     function autoPlay(delay) {
 		if (typeof delay === 'undefined') delay = 500;
         var set;
@@ -1203,7 +1201,6 @@ function showTooltip(target, text, msec) {
 		}, msec);
 
 }
-
 function showMessage(text, mseconds) {
 	var m = $('#message');
 	m.text(text);
@@ -1211,13 +1208,11 @@ function showMessage(text, mseconds) {
 	m.animate({"top":0}, 500);
 	window.setTimeout(hideMessage, mseconds);
 }
-
 function hideMessage() {
 	var m = $('#message');
 	var top = '-' + m.css('height');
 	m.animate({"top": top}, 500);
 }
-
 function showDialog(id) {
 	var wh = window.innerHeight;
 	var ww = window.innerWidth;
