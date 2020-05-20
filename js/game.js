@@ -654,30 +654,25 @@ var Game = (function(){
 	}
 
 	function resize() {
+		var playerPadding = '36pt';
+		var noPadding = '0';
+
+		// create paddings for player areas
+		var css = {
+			'padding-top':    isSinglePlayer() ? playerPadding : noPadding,
+			'padding-right':  noPadding,
+			'padding-bottom': noPadding,
+			'padding-left':   noPadding
+		};
+		_players.map(player => 'padding-' + player.position).forEach(property => css[property] = playerPadding);
+		// apply paddings
+		$('#gameContainer').css(css);
+		// recalculate cards
 		var newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
 			resizeCards();
 		}
 		['top','bottom','right','left'].forEach((side) => resizePlayers('player-'+side));
-	}
-
-	function maximize() {
-		var property;
-		var defaultPadding = '36pt';
-		var padding = '0';
-
-		var css = {
-			'padding-top':    defaultPadding,
-			'padding-right':  padding,
-			'padding-bottom': padding,
-			'padding-left':   padding
-		};
-		for (let i = 0; i < _players.length; i++) {
-			property = 'padding-' + _players[i].position;
-			css[property] = defaultPadding;
-		}
-
-		$('#gameContainer').css(css);
 
 	}
 
@@ -800,7 +795,6 @@ var Game = (function(){
 			// finally restart game
 			restart();
 		}
-		maximize();
 		resize();
     }
 
@@ -853,10 +847,7 @@ var Game = (function(){
 
     function finishSetup() {
 		$(_board).show();
-
-		maximize();
 		resize();
-
         $('#gameMessage').hide();
         initPlayers();
         restart();
@@ -1176,7 +1167,6 @@ var Game = (function(){
 		resize: resize,
         autoPlay: autoPlay,
 		topResults: showTopResults,
-		maximize: maximize,
 		version: function () {return version; },
 		debugOn: function() { _debug = true; }
     };
