@@ -1,8 +1,8 @@
-var _Game = (function($){
+const _Game = (function($){
 
-var version = "0.111";
-var svgNS = "http://www.w3.org/2000/svg";
-var xlinkNS = "http://www.w3.org/1999/xlink";
+const version = "0.111";
+const svgNS = "http://www.w3.org/2000/svg";
+const xlinkNS = "http://www.w3.org/1999/xlink";
 
 
 function Card(p) {
@@ -15,7 +15,7 @@ Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 }
 Card.prototype.toArray = function() {
-	var p = [];
+	let p = [];
 	p[0] = this.color;
 	p[1] = this.shape;
 	p[2] = this.quantity - 1;
@@ -103,32 +103,33 @@ Player.prototype.setPosition = function(position) {
 
 const Status = { active: 0, pause: 1, over: 2 };
 
-var Game = (function(){
+const Game = (function(){
 
-    var _board = null;
-    var _cardsLeft = 0;
-    var _deck = [];
-	var _next = 0;
-	var _counter = null;
-	var _players = [];
-	var _player = null;
-	var _queue = [];
-	var _timer = null;
-	var _countDown;
-	var _setup = {
+    let _board = null;
+    let _cardsLeft = 0;
+    let _deck = [];
+	let _next = 0;
+	let _counter = null;
+	let _players = [];
+	let _player = null;
+	let _queue = [];
+	let _timer = null;
+	let _countDown;
+	let _setup = {
 		player: 0,
 		next: false
 	};
-	var _status = Status.active;
-	var _eventName = "";
-    var _selectionDone = false;
-	var _clockTimer = new Timer(updateTime);
-	var _clockWidget = null;
-	var _exit = false;
-	var _userPause = false;
-	var _topResults = [];
+	let _status = Status.active;
+	let _eventName = "";
+    let _selectionDone = false;
+	let _clockTimer = new Timer(updateTime);
+	let _clockWidget = null;
+	let _exit = false;
+	let _userPause = false;
 
-	var config = {
+	let _topResults = [];
+
+	let config = {
 		rows: 3,
 		columns: 4,
 		maxColumns: 5,
@@ -138,11 +139,11 @@ var Game = (function(){
 		maxTime: 10,
         showSetOnHint: true
 	};
-	var boardPadding = 0;
-	var _isStorageAvailable = false;
-	var _debug = false;
+	let boardPadding = 0;
+	let _isStorageAvailable = false;
+	let _debug = false;
 
-    var debug = function(str) {
+    let debug = function(str) {
         if (_debug) {
             window.console.log(str);
         }
@@ -179,13 +180,13 @@ var Game = (function(){
 
 	function load() {
 		if (!_isStorageAvailable) return false;
-		var data = localStorage.getItem('data');
+		let data = localStorage.getItem('data');
 
 		if (data && data.length > 0) {
-			var state = JSON.parse(data);
+			let state = JSON.parse(data);
 			debug('Data loaded: ' + data);
 			_deck = [];
-			for (var i = 0; i < state.deck.length; i++) {
+			for (let i = 0; i < state.deck.length; i++) {
 				_deck.push(new Card(state.deck[i]));
 			}
 			_next = state.next;
@@ -224,9 +225,9 @@ var Game = (function(){
 	function save() {
 		if (!_isStorageAvailable) return;
 
-		var deckArr = _deck.map((card) => card.toArray());
+		let deckArr = _deck.map((card) => card.toArray());
 
-		var state = {
+		let state = {
 			'version': version,
 			'deck': deckArr,
 			'next': _next,
@@ -236,14 +237,14 @@ var Game = (function(){
 			'board': getBoard(),
 			'topResults': _topResults
 		};
-		var data = JSON.stringify(state);
+		const data = JSON.stringify(state);
 		//debug('Saving data: ' + data);
 		localStorage.setItem('data', data);
 		//saveTime(_clockTimer);
 	}
 
 	function copyPlayer(player) {
-		var newObj = Object.assign({}, player);
+		let newObj = Object.assign({}, player);
 		if (newObj.area) newObj.area = null;
 		return newObj;
 	}
@@ -253,7 +254,7 @@ var Game = (function(){
 	}
 
 	function buildPlayerWithArea(playerData) {
-		var newPlayer = Object.assign(new Player(), playerData);
+		let newPlayer = Object.assign(new Player(), playerData);
 		createArea(newPlayer);
 		return newPlayer;
 	}
@@ -264,16 +265,16 @@ var Game = (function(){
 	}
 
 	function getBoard() {
-		var board = [];
+		let board = [];
 		$('.cardHolder', _board).each(function() {
-			var cardElem = this.querySelector('.card');
+			let cardElem = this.querySelector('.card');
 			board.push(cardElem !== null? cardElem.card.toArray() : null);
 		});
 		return board;
 	}
 
 	function fillBoard(board) {
-		var columns = $('.column', _board);
+		let columns = $('.column', _board);
 		if (board.length > (config.rows * columns.length)) {
 			appendColumn();
 		}
@@ -285,16 +286,14 @@ var Game = (function(){
 		});
 	}
 
-    function deal(animation) {
-
-		var animate = animation || false;
-        var places = document.querySelectorAll('#gameBoard .cardHolder');
-		var elem, card, count = 0;
+    function deal(animate = false) {
+        let places = document.querySelectorAll('#gameBoard .cardHolder');
+		let elem, card, count = 0;
 
 		// remove animation
 		cards().filter('.animate').removeClass('animate');
 
-		for (var i = 0; i < places.length; i++) {
+		for (let i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
 			if (elem == null) {
 				card = next();
@@ -314,7 +313,7 @@ var Game = (function(){
     };
 
 	function placeCard(place, card, animate) {
-		var elem = document.createElement('div');
+		let elem = document.createElement('div');
 		elem.className = 'card';
 		$(elem).css(cardCss());
 		elem.card = card;
@@ -365,11 +364,11 @@ var Game = (function(){
     }
 
 	function findWinners() {
-        var winners = [];
-        var maxPoints = -999;
+        let winners = [];
+        let maxPoints = -999;
 
-        _players.forEach( function(player) {
-            var points = player.points();
+        _players.forEach((player) => {
+            let points = player.points();
             if (points == maxPoints) {
                 winners.push(player);
             } else if (points > maxPoints) {
@@ -382,7 +381,7 @@ var Game = (function(){
 	}
 
 	function newTopResult(time) {
-		var formatted;
+		let formatted = '';
 		if (toLocaleDateStringSupportsLocales()) {
 			formatted = (new Date()).toLocaleDateString(navigator.language, {
 				month: 'numeric', year: 'numeric', day: 'numeric'
@@ -397,8 +396,7 @@ var Game = (function(){
 	}
 
 	function checkTopResult(time) {
-		var i;
-		for (i = 0; i < _topResults.length; i++) {
+		for (let i = 0; i < _topResults.length; i++) {
 			if ( time < _topResults[i].time ) {
 				_topResults.splice(i, 0, newTopResult(time));
 				if (_topResults.length > 10) {
@@ -415,8 +413,7 @@ var Game = (function(){
 		return -1;
 	}
 
-	function showTopResults(current) {
-		if (typeof current === 'undefined') current = -1;
+	function showTopResults(current = -1) {
 		var list = $('#topResults ol');
 		list.empty();
 		_topResults.forEach( function(_top, index) {
@@ -439,7 +436,7 @@ var Game = (function(){
 	 * Get next card from deck and move pointer
 	 */
 	function next() {
-		var card = null;
+		let card = null;
 		if (_next < _deck.length) {
 			card = _deck[_next];
 			_next++;
@@ -450,7 +447,9 @@ var Game = (function(){
      * Shuffle cards in the deck
      */
 	function shuffle() {
-		var count = _deck.length, pos, temp;
+		let count = _deck.length;
+		let pos;
+		let temp;
 		while (count > 0) {
 			pos = Math.floor(Math.random() * count);
 			count -= 1;
@@ -461,14 +460,14 @@ var Game = (function(){
 	}
 
 	function findSet() {
-		var cards = $('#gameBoard .card');
+		let cards = $('#gameBoard .card');
 		// is board empty?
 		if (cards.length == 0) return null;
 
-		var combination = [0, 1, 2];
-		var selection;
-		var j, k, m, max = cards.length - 1;
-		var n = combination.length - 1;
+		let combination = [0, 1, 2];
+		let selection;
+		let j, k, m, max = cards.length - 1;
+		let n = combination.length - 1;
 
 		do {
 
@@ -500,7 +499,7 @@ var Game = (function(){
 	}
 
 	function nextCombination(p, max) {
-        var pos = p.length - 1;
+        let pos = p.length - 1;
 
         while (pos >= 0) {
             if (p[pos] >= max) {
@@ -547,8 +546,8 @@ var Game = (function(){
 		$('.card', _board).remove();
 		_player = null;
 		$('.player-area').removeClass('clicked winner queue');
-		var columnRemoved = false;
-		$('#gameBoard .column').each(function(index){
+		let columnRemoved = false;
+		$('#gameBoard .column').each(function(index) {
 			if (index > config.columns-1) {
 				$(this).remove();
 				columnRemoved = true;
@@ -565,7 +564,7 @@ var Game = (function(){
     }
 
 	function addMore() {
-		var columns = $('#gameBoard .column');
+		let columns = $('#gameBoard .column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
 		onColumnNumberChange();
@@ -574,12 +573,11 @@ var Game = (function(){
 	}
 
 	function appendColumn() {
-		var column = document.createElement("div");
-		var cardHolder;
+		let column = document.createElement("div");
 		column.className = "column";
 		column.style.width = config.cardWidth + 'px';
-		for (var j = 0; j < config.rows; j++) {
-			cardHolder = document.createElement("div");
+		for (let j = 0; j < config.rows; j++) {
+			let cardHolder = document.createElement("div");
 			cardHolder.className = "cardHolder";
 			$(cardHolder).css(cardHolderCss());
 			column.appendChild(cardHolder);
@@ -588,15 +586,15 @@ var Game = (function(){
 	}
 
 	function calcHeight() {
-		var h1 = Math.floor($(_board).height() * 0.9 / 3);
-		var boardWidth = $(_board).width();
-		var colCount = $('.column', _board).length;
-		var colWidth = colCount == 5 ? 0.18 : 0.23;
-		var w2 = Math.floor(boardWidth * colWidth);
+		let h1 = Math.floor($(_board).height() * 0.9 / 3);
+		let boardWidth = $(_board).width();
+		let colCount = $('.column', _board).length;
+		let colWidth = colCount == 5 ? 0.18 : 0.23;
+		let w2 = Math.floor(boardWidth * colWidth);
 		//var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
 		h1 -= h1 % 3;
-		var h2 = w2/2 * 3;
+		let h2 = w2/2 * 3;
 		if (h2 < h1) {
 			//console.log('h1=' + h1 + ', h2=' + h2 + ', w2=' + w2 + ', width=' + boardWidth);
 		}
@@ -604,8 +602,8 @@ var Game = (function(){
 	}
 
 	function cardHolderCss() {
-		var margin = Math.floor(config.cardHeight * 0.075);
-		var totalHeight = config.cardHeight * 3 + margin * 4;
+		let margin = Math.floor(config.cardHeight * 0.075);
+		let totalHeight = config.cardHeight * 3 + margin * 4;
 		debug("Card height=" + config.cardHeight + ', margin = ' + margin + ", Total height = " + totalHeight);
 		return {
 			'height': config.cardHeight,
@@ -615,7 +613,7 @@ var Game = (function(){
 	}
 
 	function cardCss() {
-		var r = Math.round(config.cardHeight * 0.06);
+		const r = Math.round(config.cardHeight * 0.06);
 		return {
 			'height': config.cardHeight + 'px',
 			'width': config.cardWidth + 'px',
@@ -624,7 +622,7 @@ var Game = (function(){
 	}
 
 	function calcCardSize() {
-		var h = calcHeight();
+		let h = calcHeight();
 		if (h != config.cardHeight) {
 			config.cardHeight = h;
 			config.cardWidth = h / 3 * 2;
@@ -640,25 +638,25 @@ var Game = (function(){
 		$('.card', _board).css(cardCss());
 		$('.cardHolder', _board).css(cardHolderCss());
 
-		var bw = $(_board).width();
-		var colMargin = bw * 0.01;
+		let bw = $(_board).width();
+		let colMargin = bw * 0.01;
 
 		$('.column', _board).css({
 			'width': config.cardWidth,
 			'margin-right': '' + colMargin + 'px',
 			'margin-left': '' + colMargin + 'px',
 		});
-		var colCount = document.querySelectorAll('.column').length;
-		var realWidth = (config.cardWidth + colMargin * 2) * colCount;
+		let colCount = document.querySelectorAll('.column').length;
+		let realWidth = (config.cardWidth + colMargin * 2) * colCount;
 		$('#columns').width(realWidth);
 	}
 
 	function resize() {
-		var playerPadding = '36pt';
-		var noPadding = '0';
+		let playerPadding = '36pt';
+		let noPadding = '0';
 
 		// create paddings for player areas
-		var css = {
+		let css = {
 			'padding-top':    isSinglePlayer() ? playerPadding : noPadding,
 			'padding-right':  noPadding,
 			'padding-bottom': noPadding,
@@ -668,7 +666,7 @@ var Game = (function(){
 		// apply paddings
 		$('#gameContainer').css(css);
 		// recalculate cards
-		var newHeight = calcHeight();
+		let newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
 			resizeCards();
 		}
@@ -706,19 +704,18 @@ var Game = (function(){
 
         $('#gameInfo').html(version);
 
-		var offset = $(_board).offset();
+		let offset = $(_board).offset();
 		boardPadding = offset.top;
 		_isStorageAvailable = storageAvailable();
 
-        var i;
-        for (i = 0; i < config.columns; i++) {
+        for (let i = 0; i < config.columns; i++) {
 			appendColumn();
         }
 		//calcCardSize();
 
-		var MAX_VAL = 2;
+		const MAX_VAL = 2;
 		// fill cards
-		var p = [0, 0, 0, 0];
+		let p = [0, 0, 0, 0];
 
 		//
 		// event handlers
@@ -744,7 +741,7 @@ var Game = (function(){
 		});
 
 		$('#setupDialog .button').on(_eventName, function() {
-			var count = parseInt(this.innerHTML);
+			let count = parseInt(this.innerHTML);
 			hideDialog('#setupDialog');
 			createPlayers(count);
 			runSetup();
@@ -810,12 +807,12 @@ var Game = (function(){
 
 	function setupPlayer() {
 		instruction('Select area for player ' + (_setup.player + 1));
-		var player = _players[_setup.player];
+		let player = _players[_setup.player];
 		$(document).one(_eventName, function(event){
-			var wh = window.innerHeight;
-			var ww = window.innerWidth;
-			var clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
-			var clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
+			let wh = window.innerHeight;
+			let ww = window.innerWidth;
+			let clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
+			let clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
 			if (clickY < boardPadding) {
 				player.setPosition('top');
 			} else if (clickY > (wh - boardPadding)) {
@@ -854,8 +851,8 @@ var Game = (function(){
     }
 
 	function createArea(player) {
-		var area = $('<div class="player-area noselect"></div>');
-		var contents = $('<div class="player-contents"></div');
+		let area = $('<div class="player-area noselect"></div>');
+		let contents = $('<div class="player-contents"></div');
 		area.addClass(player.class).appendTo($('body'));
 		resizePlayers(player.class);
 		if (player.class == 'player-bottom' || player.class == 'player-left') {
@@ -882,8 +879,8 @@ var Game = (function(){
 		if (_status == Status.over) return;
 		if (isSinglePlayer()) return;
 		// exit if not first :)
-		var clicked = $(this);
-		var clickedId = clicked.data('player');
+		let clicked = $(this);
+		let clickedId = clicked.data('player');
 
 		if (_player != null) {
 			// current player cannot go to queue
@@ -940,8 +937,8 @@ var Game = (function(){
 
 	function timerEvent() {
 		_countDown--;
-		var percent = 100 * (config.maxTime - _countDown) / config.maxTime;
-		var t = _player.area.find('.player-timer');
+		const percent = 100 * (config.maxTime - _countDown) / config.maxTime;
+		let t = _player.area.find('.player-timer');
 		if (_player.layout == 'horizontal') {
 			t.css('width', percent +'%');
 		} else {
@@ -959,9 +956,9 @@ var Game = (function(){
 
 	function resizePlayers(playerClass) {
 		// find same class players
-		var same = $('.' + playerClass);
-		var playerCount = same.length;
-		var size = 0, pos = boardPadding;
+		let same = $('.' + playerClass);
+		let playerCount = same.length;
+		let size = 0, pos = boardPadding;
 		if (playerClass == 'player-top' || playerClass == 'player-bottom') {
 			size = Math.floor((window.innerWidth - boardPadding*2) / playerCount);
 			same.css('width', size).each(function(index){
@@ -991,12 +988,11 @@ var Game = (function(){
 		}
 	}
 
-	function instruction (html, style, msec) {
-		var my = style || 'normal';
+	function instruction (html, style = 'normal', msec) {
 		var delay = (typeof msec == "number")? msec : 0;
 		var obj = $('#gameMessage');
 		obj.children().remove();
-		obj.html(html).attr('class', 'instruction ' + my).show();
+		obj.html(html).attr('class', 'instruction ' + style).show();
 		if (delay > 0) {
 			window.setTimeout(instructionOff, delay);
 		}
@@ -1008,9 +1004,9 @@ var Game = (function(){
 
 	function checkSet(selection) {
 		if (selection.length < 3) return false;
-		var c1 = selection[0].card;
-		var c2 = selection[1].card;
-		var c3 = selection[2].card;
+		const c1 = selection[0].card;
+		const c2 = selection[1].card;
+		const c3 = selection[2].card;
 		return checkAttribute(c1.color, c2.color, c3.color) &&
 			checkAttribute(c1.fill, c2.fill, c3.fill) &&
 			checkAttribute(c1.shape, c2.shape, c3.shape) &&
@@ -1035,17 +1031,15 @@ var Game = (function(){
 	}
 
 	function hint(btn) {
-		var set = findSet();
+		let set = findSet();
 
 		if (config.showSetOnHint) cards().removeClass('hint selected');
 		if (set) {
 			//instruction('Set exists!', 'green', 2000);
-			//showTooltip($(btn), 'Set exists!', 2000);
 			if (config.showSetOnHint) $(set).addClass('hint');
 		} else {
 			instruction('Not found!', 'error', 2000);
 			//showMessage('No set found', 1000);
-			//showTooltip($(btn), 'No set found!', 2000);
 		}
 	}
 
@@ -1057,7 +1051,7 @@ var Game = (function(){
 		}
 
 		$(card).removeClass('hint').toggleClass('selected');
-		var selection = $('.card.selected', _board);
+		let selection = $('.card.selected', _board);
 		if (selection.length == 3) {
             _selectionDone = true;
 			clearTimers();
@@ -1068,8 +1062,8 @@ var Game = (function(){
 	}
 
 	function checkSelection() {
-		var check = [];
-		var selection = $('.card.selected', _board);
+		let check = [];
+		let selection = $('.card.selected', _board);
 
 		selection.each(function() { check.push(this) });
 		cards().removeClass('hint selected');
@@ -1078,9 +1072,9 @@ var Game = (function(){
 		if (checkSet(check)) {
 			// correct SET
 			selection.remove();
-			var columns = $('#gameBoard .column');
-			var movers = $('.column:last .card',_board);
-			var moveIndex = 0;
+			let columns = $('#gameBoard .column');
+			let movers = $('.column:last .card',_board);
+			let moveIndex = 0;
 			if (columns.length == config.maxColumns) {
 				$('.column',_board).not(':last').find('.cardHolder').each(function(){
 					if (!this.hasChildNodes()) {
@@ -1110,11 +1104,8 @@ var Game = (function(){
 		save();
 	}
 
-    function autoPlay(delay) {
-		if (typeof delay === 'undefined') delay = 500;
-        var set;
-
-        set = findSet();
+    function autoPlay(delay = 500) {
+        let set = findSet();
         if (set != null) {
             $(set).addClass('selected');
 
@@ -1134,7 +1125,7 @@ var Game = (function(){
 		if (_player == null) return;
 
 		_player.wins++;
-		var area = _player.area;
+		let area = _player.area;
 		area.find('.win-counter').html(_player.wins);
 		area.removeClass('clicked');
 		_player = null;
@@ -1149,7 +1140,7 @@ var Game = (function(){
 		if (_player == null) return;
 
 		_player.fails++;
-		var area = _player.area;
+		let area = _player.area;
 		area.find('.fail-counter').html(_player.fails);
 		area.removeClass('clicked');
 		_player = null;
@@ -1173,13 +1164,13 @@ var Game = (function(){
 })();
 
 function showTooltip(target, text, msec) {
-	var tip = document.getElementById('toolbarTip');
+	let tip = document.getElementById('toolbarTip');
 	tip.style.visibility = 'hidden';
 	tip.style.display = 'block';
-	var tt = $(tip);
+	let tt = $(tip);
 	tip.innerHTML = text;
-	var pos = target.offset();
-	var width = tt.get(0).clientWidth;
+	let pos = target.offset();
+	let width = tt.get(0).clientWidth;
 	tip.style.display = 'none';
 	tip.style.visibility = 'visible';
 	tt.css({
@@ -1195,7 +1186,7 @@ function showTooltip(target, text, msec) {
 }
 
 function showMessage(text, mseconds) {
-	var m = $('#message');
+	let m = $('#message');
 	m.text(text);
 	m.css('top','-' + m.css('height'));
 	m.animate({"top":0}, 500);
@@ -1203,19 +1194,19 @@ function showMessage(text, mseconds) {
 }
 
 function hideMessage() {
-	var m = $('#message');
-	var top = '-' + m.css('height');
+	let m = $('#message');
+	let top = '-' + m.css('height');
 	m.animate({"top": top}, 500);
 }
 
 function showDialog(id) {
-	var wh = window.innerHeight;
-	var ww = window.innerWidth;
-	var dlg = $(id);
+	const dlg = $(id);
+	let wh = window.innerHeight;
+	let ww = window.innerWidth;
 	dlg.parent().show();
-	var dw = dlg.width();
-	var dh;
-	var innerHeight = 0;
+	let dw = dlg.width();
+	let dh;
+	let innerHeight = 0;
 	dlg.children().each(function () {
 		innerHeight += this.clientHeight;
 	});
@@ -1251,8 +1242,8 @@ function toLocaleDateStringSupportsLocales() {
 
 function storageAvailable() {
 	try {
-		var storage = window.localStorage,
-			x = '__storage_test__';
+		let storage = window.localStorage;
+		let x = '__storage_test__';
 		storage.setItem(x, x);
 		storage.removeItem(x);
 		return true;
@@ -1268,7 +1259,7 @@ function storageAvailable() {
 $(function(){
 
 
-	var eventName = 'click';
+	let eventName = 'click';
 	if ('ontouchstart' in document.documentElement) {
 		eventName = 'touchstart';
 	}
