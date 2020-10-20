@@ -6,10 +6,10 @@ const xlinkNS = "http://www.w3.org/1999/xlink";
 
 
 function Card(p) {
-    this.color = p[0];
-    this.shape = p[1];
-    this.quantity = p[2] + 1;
-    this.fill = p[3];
+	this.color = p[0];
+	this.shape = p[1];
+	this.quantity = p[2] + 1;
+	this.fill = p[3];
 }
 Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
@@ -100,14 +100,25 @@ Player.prototype.setPosition = function(position) {
 	this.class = 'player-' + position;
 };
 
+Player.prototype.increaseWins = function() {
+	this.wins++;
+	this.area.find('.win-counter').html(this.wins);
+	this.area.removeClass('clicked');
+};
+
+Player.prototype.increaseFails = function() {
+	this.fails++;
+	this.area.find('.fail-counter').html(this.fails);
+	this.area.removeClass('clicked');
+};
 
 const Status = { active: 0, pause: 1, over: 2 };
 
 const Game = (function(){
 
-    let _board = null;
-    let _cardsLeft = 0;
-    let _deck = [];
+	let _board = null;
+	let _cardsLeft = 0;
+	let _deck = [];
 	let _next = 0;
 	let _counter = null;
 	let _players = [];
@@ -121,7 +132,7 @@ const Game = (function(){
 	};
 	let _status = Status.active;
 	let _eventName = "";
-    let _selectionDone = false;
+	let _selectionDone = false;
 	let _clockTimer = new Timer(updateTime);
 	let _clockWidget = null;
 	let _exit = false;
@@ -137,16 +148,16 @@ const Game = (function(){
 		cardWidth: 300,
 		keepScore: false,
 		maxTime: 10,
-        showSetOnHint: true
+		showSetOnHint: true
 	};
 	let boardPadding = 0;
 	let _isStorageAvailable = false;
 	let _debug = false;
 
-    let debug = function(str) {
-        if (_debug) {
-            window.console.log(str);
-        }
+	let debug = function(str) {
+		if (_debug) {
+			window.console.log(str);
+		}
 	};
 
 	function isPause() {
@@ -286,8 +297,8 @@ const Game = (function(){
 		});
 	}
 
-    function deal(animate = false) {
-        let places = document.querySelectorAll('#gameBoard .cardHolder');
+	function deal(animate = false) {
+		let places = document.querySelectorAll('#gameBoard .cardHolder');
 		let elem, card, count = 0;
 
 		// remove animation
@@ -305,12 +316,12 @@ const Game = (function(){
 				}
 			}
 		}
-        _cardsLeft = _deck.length - _next;
-        debug("Added " + count + " cards, " + _cardsLeft + " left");
+		_cardsLeft = _deck.length - _next;
+		debug("Added " + count + " cards, " + _cardsLeft + " left");
 		if (_counter) {
 			_counter.innerHTML = "" + _cardsLeft;
 		}
-    };
+	};
 
 	function placeCard(place, card, animate) {
 		let elem = document.createElement('div');
@@ -325,23 +336,23 @@ const Game = (function(){
 	}
 
 	function checkForMore() {
-        var setNotFound = (findSet() == null);
+		var setNotFound = (findSet() == null);
 		if (setNotFound) {
-            debug("checkForMore: set not found, " + _cardsLeft + " cards left");
-            if (_cardsLeft > 0) {
-			    if (addMore()) {
-                    deal(true);
-                    setNotFound = findSet() == null;
-                }
-            }
+			debug("checkForMore: set not found, " + _cardsLeft + " cards left");
+			if (_cardsLeft > 0) {
+				if (addMore()) {
+					deal(true);
+					setNotFound = findSet() == null;
+				}
+			}
 		}
 
-        if (setNotFound) {
-            gameOver();
-        }
+		if (setNotFound) {
+			gameOver();
+		}
 	}
 
-    function gameOver() {
+	function gameOver() {
 		findWinners();
 		_status = Status.over;
 		_clockTimer.stop();
@@ -357,25 +368,25 @@ const Game = (function(){
 		}
 		save();
 		if (_cardsLeft == 0) {
-        	instruction("Game over!", 'normal', 2000);
+			instruction("Game over!", 'normal', 2000);
 		} else {
 			instruction("No more sets", 'normal', 2000);
 		}
-    }
+	}
 
 	function findWinners() {
-        let winners = [];
-        let maxPoints = -999;
+		let winners = [];
+		let maxPoints = -999;
 
-        _players.forEach((player) => {
-            let points = player.points();
-            if (points == maxPoints) {
-                winners.push(player);
-            } else if (points > maxPoints) {
-                winners = [player];
-                maxPoints = points;
-            }
-        });
+		_players.forEach((player) => {
+			let points = player.points();
+			if (points == maxPoints) {
+				winners.push(player);
+			} else if (points > maxPoints) {
+				winners = [player];
+				maxPoints = points;
+			}
+		});
 		//debug("Max points " + maxPoints + ", winners = " + winners.length);
 		winners.forEach((p) => p.area.addClass('winner'));
 	}
@@ -444,8 +455,8 @@ const Game = (function(){
 		return card;
 	}
 	/*
-     * Shuffle cards in the deck
-     */
+	 * Shuffle cards in the deck
+	 */
 	function shuffle() {
 		let count = _deck.length;
 		let pos;
@@ -477,7 +488,7 @@ const Game = (function(){
 				selection.push(cards.get(combination[j]));
 			}
 			if (checkSet(selection)) {
-                debug("findSet - set found in " + cards.length + " cards");
+				debug("findSet - set found in " + cards.length + " cards");
 				return selection;
 			}
 			for (k = n, m = max; k >= 0; k--,m--) {
@@ -494,24 +505,24 @@ const Game = (function(){
 			}
 
 		} while (true);
-        debug("findSet - not found in " + cards.length + " cards");
+		debug("findSet - not found in " + cards.length + " cards");
 		return null;
 	}
 
 	function nextCombination(p, max) {
-        let pos = p.length - 1;
+		let pos = p.length - 1;
 
-        while (pos >= 0) {
-            if (p[pos] >= max) {
-                p[pos] = 0;
-                pos--;
-            } else {
-                p[pos] += 1;
-                return true;
-            }
-        }
+		while (pos >= 0) {
+			if (p[pos] >= max) {
+				p[pos] = 0;
+				pos--;
+			} else {
+				p[pos] += 1;
+				return true;
+			}
+		}
 
-        return false;
+		return false;
 	}
 
 	function restart() {
@@ -531,8 +542,8 @@ const Game = (function(){
 			_clockTimer.start();
 			_clockWidget.show();
 		}
-        deal();
-        checkForMore();
+		deal();
+		checkForMore();
 		save();
 	}
 
@@ -558,17 +569,17 @@ const Game = (function(){
 		}
 	}
 
-    function commandMore() {
-        addMore();
-        deal(true);
-    }
+	function commandMore() {
+		addMore();
+		deal(true);
+	}
 
 	function addMore() {
 		let columns = $('#gameBoard .column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
 		onColumnNumberChange();
-        debug("1 column added")
+		debug("1 column added")
 		return true;
 	}
 
@@ -699,23 +710,21 @@ const Game = (function(){
 		e.preventDefault();
 	}
 
-    function init() {
+	function init() {
 		_board = document.getElementById("gameBoard");
 
-        $('#gameInfo').html(version);
+		$('#gameInfo').html(version);
 
 		let offset = $(_board).offset();
 		boardPadding = offset.top;
 		_isStorageAvailable = storageAvailable();
 
-        for (let i = 0; i < config.columns; i++) {
+		for (let i = 0; i < config.columns; i++) {
 			appendColumn();
-        }
+		}
 		//calcCardSize();
 
 		const MAX_VAL = 2;
-		// fill cards
-		let p = [0, 0, 0, 0];
 
 		//
 		// event handlers
@@ -778,7 +787,9 @@ const Game = (function(){
 		window.addEventListener('beforeunload', escape);
 
 		if (!load()) {
-			var cardIndex = 0;
+			let cardIndex = 0;
+			let p = [0, 0, 0, 0];
+
 			do {
 				_deck[cardIndex++] = new Card(p);
 			} while (nextCombination(p, MAX_VAL));
@@ -793,7 +804,7 @@ const Game = (function(){
 			restart();
 		}
 		resize();
-    }
+	}
 
 	function setup() {
 		showDialog('#setupDialog');
@@ -835,27 +846,27 @@ const Game = (function(){
 					_setup.player++;
 					window.setTimeout(setupPlayer, 10);
 				} else {
-                    finishSetup();
+					finishSetup();
 				}
 
 			}
 		});
 	}
 
-    function finishSetup() {
+	function finishSetup() {
 		$(_board).show();
 		resize();
-        $('#gameMessage').hide();
-        initPlayers();
-        restart();
-    }
+		$('#gameMessage').hide();
+		initPlayers();
+		restart();
+	}
 
 	function createArea(player) {
 		let area = $('<div class="player-area noselect"></div>');
 		let contents = $('<div class="player-contents"></div');
 		area.addClass(player.class).appendTo($('body'));
 		resizePlayers(player.class);
-		if (player.class == 'player-bottom' || player.class == 'player-left') {
+		if (player.position == 'bottom' || player.position == 'left') {
 			contents.append('<div class="win-counter">' + player.wins + '</div>')
 			contents.append('<div class="fail-counter">' + player.fails + '</div>')
 		} else {
@@ -1019,7 +1030,6 @@ const Game = (function(){
 	}
 
 	function error(msg) {
-		//document.getElementById('audio-error').play();
 		$('#errorMessage').parent().show();
 		window.setTimeout(function(){
 				$('#errorMessage').parent().hide();
@@ -1044,7 +1054,7 @@ const Game = (function(){
 	}
 
 	function onCardSelect(card) {
-        if (_selectionDone || _status == Status.over) return;
+		if (_selectionDone || _status == Status.over) return;
 		if (_players.length > 1 && _player == null) {
 			instruction('Select player first', 'error', 2000);
 			return;
@@ -1053,7 +1063,7 @@ const Game = (function(){
 		$(card).removeClass('hint').toggleClass('selected');
 		let selection = $('.card.selected', _board);
 		if (selection.length == 3) {
-            _selectionDone = true;
+			_selectionDone = true;
 			clearTimers();
 			window.setTimeout(function(){
 				checkSelection();
@@ -1067,7 +1077,7 @@ const Game = (function(){
 
 		selection.each(function() { check.push(this) });
 		cards().removeClass('hint selected');
-        _selectionDone = false;
+		_selectionDone = false;
 
 		if (checkSet(check)) {
 			// correct SET
@@ -1084,14 +1094,14 @@ const Game = (function(){
 				});
 				$('.column:last', _board).remove();
 				onColumnNumberChange();
-                debug("1 column removed");
+				debug("1 column removed");
 			} else {
 				deal(true);
 			}
-            playerWins();
+			playerWins();
 
-            // Check if we need more cards
-            checkForMore();
+			// Check if we need more cards
+			checkForMore();
 
 
 		} else {
@@ -1104,19 +1114,19 @@ const Game = (function(){
 		save();
 	}
 
-    function autoPlay(delay = 500) {
-        let set = findSet();
-        if (set != null) {
-            $(set).addClass('selected');
+	function autoPlay(delay = 500) {
+		let set = findSet();
+		if (set != null) {
+			$(set).addClass('selected');
 
-            // select random player
-            var index = Math.floor(Math.random() * _players.length);
-            _player = _players[index];
-            checkSelection();
-            window.setTimeout(() => autoPlay(delay), delay);
-        }
-        return true;
-    }
+			// select random player
+			var index = Math.floor(Math.random() * _players.length);
+			_player = _players[index];
+			checkSelection();
+			window.setTimeout(() => autoPlay(delay), delay);
+		}
+		return true;
+	}
 
 	function playerWins() {
 		if (isSinglePlayer()) {
@@ -1124,10 +1134,7 @@ const Game = (function(){
 		}
 		if (_player == null) return;
 
-		_player.wins++;
-		let area = _player.area;
-		area.find('.win-counter').html(_player.wins);
-		area.removeClass('clicked');
+		_player.increaseWins();
 		_player = null;
 		// Queue
 		emptyQueue();
@@ -1139,28 +1146,25 @@ const Game = (function(){
 		}
 		if (_player == null) return;
 
-		_player.fails++;
-		let area = _player.area;
-		area.find('.fail-counter').html(_player.fails);
-		area.removeClass('clicked');
+		_player.increaseFails();
 		_player = null;
 		// Queue
 		nextInQueue();
 		save();
 	}
 
-    return {
-        init: init,
+	return {
+		init: init,
 		hint: hint,
 		more: commandMore,
 		restart: restart,
 		setup: setup,
 		resize: resize,
-        autoPlay: autoPlay,
+		autoPlay: autoPlay,
 		topResults: showTopResults,
 		version: function () {return version; },
 		debugOn: function() { _debug = true; }
-    };
+	};
 })();
 
 function showTooltip(target, text, msec) {
@@ -1185,15 +1189,15 @@ function showTooltip(target, text, msec) {
 
 }
 
-function showMessage(text, mseconds) {
+function showTopMessage(text, mseconds = 1000) {
 	let m = $('#message');
 	m.text(text);
 	m.css('top','-' + m.css('height'));
 	m.animate({"top":0}, 500);
-	window.setTimeout(hideMessage, mseconds);
+	window.setTimeout(hideTopMessage, mseconds);
 }
 
-function hideMessage() {
+function hideTopMessage() {
 	let m = $('#message');
 	let top = '-' + m.css('height');
 	m.animate({"top": top}, 500);
