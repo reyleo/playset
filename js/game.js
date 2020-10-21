@@ -650,7 +650,7 @@ const Game = (function(){
 		$('.cardHolder', _board).css(cardHolderCss());
 
 		let bw = $(_board).width();
-		let colMargin = bw * 0.01;
+		let colMargin = Math.floor(bw * 0.01);
 
 		$('.column', _board).css({
 			'width': config.cardWidth,
