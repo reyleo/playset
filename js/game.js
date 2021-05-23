@@ -1,6 +1,6 @@
 const _Game = (function($){
 
-const version = "0.111";
+const version = "0.113";
 const svgNS = "http://www.w3.org/2000/svg";
 const xlinkNS = "http://www.w3.org/1999/xlink";
 
