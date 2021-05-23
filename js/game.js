@@ -668,7 +668,7 @@ const Game = (function(){
 
 		// create paddings for player areas
 		let css = {
-			'padding-top':    isSinglePlayer() ? playerPadding : noPadding,
+			'padding-top':    playerPadding,
 			'padding-right':  noPadding,
 			'padding-bottom': noPadding,
 			'padding-left':   noPadding
