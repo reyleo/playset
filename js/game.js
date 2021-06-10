@@ -597,10 +597,10 @@ const Game = (function(){
 	}
 
 	function calcHeight() {
-		let h1 = Math.floor($(_board).height() * 0.9 / 3);
+		let h1 = Math.floor($(_board).height() * 0.9 / config.rows);
 		let boardWidth = $(_board).width();
 		let colCount = $('.column', _board).length;
-		let colWidth = colCount == 5 ? 0.18 : 0.23;
+		let colWidth = 1/colCount - 0.02;
 		let w2 = Math.floor(boardWidth * colWidth);
 		//var w2 = Math.floor(boardWidth * 0.18);
 		w2 -= w2 % 2;
