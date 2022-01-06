@@ -12,5 +12,6 @@ Features:
 * Timer in the single player mode
 * Top scores
 * Pause/resume
+* Replay last game
 
 ![Nexus](images/android.png)
