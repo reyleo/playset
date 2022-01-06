@@ -137,6 +137,7 @@ const Game = (function(){
 	let _clockWidget = null;
 	let _exit = false;
 	let _userPause = false;
+	let _replayMode = false;
 
 	let _topResults = [];
 
@@ -203,6 +204,7 @@ const Game = (function(){
 			_next = state.next;
 			_cardsLeft = _deck.length - _next;
 			_status = state.status;
+			_replayMode = !!state.replayMode;
 			if (state.topResults) _topResults = state.topResults;
 
 			loadPlayers(state.players);
@@ -246,7 +248,8 @@ const Game = (function(){
 			'status': _status,
 			'timer': _clockTimer.getTime(),
 			'board': getBoard(),
-			'topResults': _topResults
+			'topResults': _topResults,
+			'replayMode': _replayMode
 		};
 		const data = JSON.stringify(state);
 		//debug('Saving data: ' + data);
@@ -358,7 +361,7 @@ const Game = (function(){
 		_clockTimer.stop();
 		updateTime(_clockTimer);
 		// save top result if all cards played
-		if (isSinglePlayer() && _cardsLeft == 0) {
+		if (isSinglePlayer() && _cardsLeft == 0 && !_replayMode) {
 			// get time in msec
 			var time = _clockTimer.getTime();
 			var position = checkTopResult(time);
@@ -525,12 +528,13 @@ const Game = (function(){
 		return false;
 	}
 
-	function restart() {
+	function restart(options = {replay: false}) {
 		_next = 0;
 		_cardsLeft = _deck.length;
 		_status = Status.active;
 		clear();
-		shuffle();
+		if (!options.replay) shuffle();
+		_replayMode = !!options.replay;
 		if (!config.keepScore) {
 			resetScore();
 		}
@@ -545,6 +549,10 @@ const Game = (function(){
 		deal();
 		checkForMore();
 		save();
+	}
+
+	function replay() {
+		restart({replay: true});
 	}
 
 	function resetScore() {
@@ -1153,6 +1161,17 @@ const Game = (function(){
 		save();
 	}
 
+	function getState() {
+		return {
+			cardsLeft: _cardsLeft,
+			counter: _counter,
+			status: _status,
+			userPause: _userPause,
+			replayMode: _replayMode,
+			debug: _debug,
+		}
+	}
+
 	return {
 		init: init,
 		hint: hint,
@@ -1162,7 +1181,10 @@ const Game = (function(){
 		resize: resize,
 		autoPlay: autoPlay,
 		topResults: showTopResults,
-		version: function () {return version; },
+		replay: replay,
+		state: getState,
+		status: function() { return _status; },
+		version: function() { return version; },
 		debugOn: function() { _debug = true; }
 	};
 })();
@@ -1291,6 +1313,12 @@ $(function(){
 		menuSwitch();
 	});
 
+	$('#btnReplay').on(eventName, function(){
+		if ($(this).hasClass('disabled')) return;
+		Game.replay();
+		menuSwitch();
+	});
+
 	$('#menuSwitch').on(eventName, menuSwitch );
 
 	$('#btnSetup').on(eventName, function() {
@@ -1312,9 +1340,12 @@ $(function(){
 });
 
 function menuSwitch() {
-	var menu = $('#controls');
+	let menu = $('#controls');
 	if (menu.is(':visible')) menu.hide();
-	else menu.show(0);
+	else {
+		$('#btnReplay',menu).toggleClass('disabled', Game.status() !== Status.over);
+		menu.show(0);
+	}
 }
 return Game;
 })(window.jQuery);

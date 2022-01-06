@@ -262,6 +262,9 @@
 	#controls .button.error {
 		background-color: #c00;
 	}
+	#controls .button.disabled {
+		color: #999;
+	}
 
 	#counter {
 		width: 80%;
