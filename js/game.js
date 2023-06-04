@@ -15,12 +15,7 @@ Card.prototype.toString = function() {
 	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 }
 Card.prototype.toArray = function() {
-	let p = [];
-	p[0] = this.color;
-	p[1] = this.shape;
-	p[2] = this.quantity - 1;
-	p[3] = this.fill;
-	return p;
+	return [this.color, this.shape, this.quantity - 1, this.fill];
 }
 Card.prototype._shapes = ["pill", "curve", "rhomb"];
 Card.prototype._colors = ["red", "green", "purple"];

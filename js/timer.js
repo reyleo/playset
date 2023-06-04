@@ -1,17 +1,17 @@
 var Timer = function (callback) {
-	var _status = 0; // 0- stopped, 1 - running, 2 - paused
-	var _ticks = 0;
-	var _start = 0;
-	var _ms = 0;
-	var _timer = null;
-	var tick = function() {
+	let _status = 0; // 0- stopped, 1 - running, 2 - paused
+	let _ticks = 0;
+	let _start = 0;
+	let _ms = 0;
+	let _timer = null;
+	let tick = function() {
 		_ticks++;
 		if (_callback) callback(this);
 	};
-	var _callback = null;
+	let _callback = null;
 
-	var val2int = function(val){
-		var num = 0;
+	let val2int = function(val){
+		let num = 0;
 		if (typeof val === 'undefined') {
 			num = 0;
 		} else if (typeof val === 'string') {
@@ -21,12 +21,12 @@ var Timer = function (callback) {
 		}
 		return num;
 	};
-	var start = function(from) {
+	let start = function(from) {
 			if (_status != 2) {
 				_ms = val2int(from);
-			} 
+			}
 			_ticks = Math.floor(_ms / 1000);
-			
+
 			_start = (new Date()).getTime();
 			if (_timer) {
 				window.clearInterval(_timer);
@@ -75,7 +75,7 @@ var Timer = function (callback) {
 			return _status;
 		},
 	toString = function() {
-			var t = isRunning() ? _ticks * 1000 : _ms; 
+			let t = isRunning() ? _ticks * 1000 : _ms;
 			return Timer.formatTime(t);
 		}
 
@@ -97,10 +97,10 @@ var Timer = function (callback) {
 	};
 };
 Timer.formatTime = function(ms) {
-	var units = [60, 60, 24];
-	var val = Math.floor(ms/1000), rem, str;
-	var time = [];
-	for (var i = 0; i < units.length; i++) {
+	const units = [60, 60, 24];
+	let val = Math.floor(ms/1000), rem, str;
+	let time = [];
+	for (let i = 0; i < units.length; i++) {
 		rem = val % units[i];
 		str =  (rem < 10 ? '0' : '') + rem;
 		time.push(str);
