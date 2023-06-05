@@ -275,22 +275,23 @@ const Game = (function(){
 
 	function getBoard() {
 		let board = [];
-		$('.cardHolder', _board).each(function() {
-			let cardElem = this.querySelector('.card');
+		_board.querySelectorAll('.cardHolder').forEach(function(holder) {
+			const cardElem = holder.querySelector('.card');
 			board.push(cardElem !== null? cardElem.card.toArray() : null);
 		});
 		return board;
 	}
 
 	function fillBoard(board) {
-		let columns = $('.column', _board);
+		let columns = _board.querySelectorAll('.column');
 		if (board.length > (config.rows * columns.length)) {
 			appendColumn();
 		}
-		$('.cardHolder', _board).each(function(index) {
-			$(this).find('.card').remove();
+		_board.querySelectorAll('.cardHolder').forEach(function(holder, index) {
+			const card = holder.querySelector('.card')
+			if (card) card.remove();
 			if (board[index] != null) {
-				placeCard(this, new Card(board[index]), false);
+				placeCard(holder, new Card(board[index]), false);
 			}
 		});
 	}
@@ -300,7 +301,7 @@ const Game = (function(){
 		let elem, card, count = 0;
 
 		// remove animation
-		cards().filter('.animate').removeClass('animate');
+		cards().forEach((card) => card.classList.remove('animate'));
 
 		for (let i = 0; i < places.length; i++) {
 			elem = places[i].querySelector('.card');
@@ -321,14 +322,18 @@ const Game = (function(){
 		}
 	};
 
+	function applyStyle(el, obj) {
+		Object.assign(el.style, obj);
+	}
+
 	function placeCard(place, card, animate) {
 		let elem = document.createElement('div');
-		elem.className = 'card';
-		$(elem).css(cardCss());
+		elem.classList.add('card');
+		applyStyle(elem, cardCss());
 		elem.card = card;
 		card.render(elem);
 		if (animate) {
-			$(elem).addClass('animate')
+			elem.classList.add('animate')
 		}
 		place.appendChild(elem);
 	}
@@ -423,23 +428,23 @@ const Game = (function(){
 	}
 
 	function showTopResults(current = -1) {
-		var list = $('#topResults ol');
-		list.empty();
-		_topResults.forEach( function(_top, index) {
-			var item = $('<li>');
-			item.html(Timer.formatTime(_top.time));
-			item.append('<span class="date">' + _top.date + '</span>');
+		var list = document.querySelector('#topResults ol');
+		list.innerHTML = '';
+		_topResults.forEach(function(_top, index) {
+			var item = document.createElement('li');
+			item.insertAdjacentText('afterbegin', Timer.formatTime(_top.time));
+			item.insertAdjacentHTML('beforeend',`<span class="date">${_top.date}</span>`);
 			if (current == index) {
-				item.addClass('current');
+				item.classList.add('current');
 			}
-			list.append(item);
+			list.appendChild(item);
 		});
 		showDialog('#topResults');
 	}
 
 	function clearTopResults() {
 		_topResults = [];
-		$('#topResults ol').empty();
+		document.querySelectorAll('#topResults li').forEach((item) => item.innerHTML = '');
 	}
 	/*
 	 * Get next card from deck and move pointer
@@ -469,13 +474,13 @@ const Game = (function(){
 	}
 
 	function findSet() {
-		let cards = $('#gameBoard .card');
+		let boardCards = cards();
 		// is board empty?
-		if (cards.length == 0) return null;
+		if (boardCards.length == 0) return null;
 
 		let combination = [0, 1, 2];
 		let selection;
-		let j, k, m, max = cards.length - 1;
+		let j, k, m, max = boardCards.length - 1;
 		let n = combination.length - 1;
 
 		do {
@@ -483,10 +488,10 @@ const Game = (function(){
 			selection = [];
 
 			for (j = 0; j < combination.length; j++) {
-				selection.push(cards.get(combination[j]));
+				selection.push(boardCards.item(combination[j]));
 			}
 			if (checkSet(selection)) {
-				debug("findSet - set found in " + cards.length + " cards");
+				debug("findSet - set found in " + boardCards.length + " cards");
 				return selection;
 			}
 			for (k = n, m = max; k >= 0; k--,m--) {
@@ -503,7 +508,7 @@ const Game = (function(){
 			}
 
 		} while (true);
-		debug("findSet - not found in " + cards.length + " cards");
+		debug("findSet - not found in " + boardCards.length + " cards");
 		return null;
 	}
 
@@ -552,18 +557,18 @@ const Game = (function(){
 
 	function resetScore() {
 		_players.forEach((player) => player.resetScore());
-		$('.win-counter,.fail-counter').html('0');
+		document.querySelectorAll('.win-counter,.fail-counter').forEach((el) => el.innerHTML = '0');
 	}
 
 	function clear() {
 		clearTimers();
-		$('.card', _board).remove();
+		cards().forEach((card) => card.remove());
 		_player = null;
-		$('.player-area').removeClass('clicked winner queue');
+		document.querySelectorAll('.player-area').forEach((el) => el.classList.remove('clicked', 'winner', 'queue'));
 		let columnRemoved = false;
-		$('#gameBoard .column').each(function(index) {
+		_board.querySelectorAll('.column').forEach(function(col, index) {
 			if (index > config.columns-1) {
-				$(this).remove();
+				col.remove();
 				columnRemoved = true;
 			}
 		});
@@ -578,7 +583,7 @@ const Game = (function(){
 	}
 
 	function addMore() {
-		let columns = $('#gameBoard .column');
+		let columns = _board.querySelectorAll('.column');
 		if (columns.length == config.maxColumns) return false;
 		appendColumn();
 		onColumnNumberChange();
@@ -588,12 +593,12 @@ const Game = (function(){
 
 	function appendColumn() {
 		let column = document.createElement("div");
-		column.className = "column";
+		column.classList.add('column');
 		column.style.width = config.cardWidth + 'px';
 		for (let j = 0; j < config.rows; j++) {
 			let cardHolder = document.createElement("div");
-			cardHolder.className = "cardHolder";
-			$(cardHolder).css(cardHolderCss());
+			cardHolder.classList.add("cardHolder");
+			applyStyle(cardHolder, cardHolderCss());
 			column.appendChild(cardHolder);
 		}
 		document.getElementById('columns').appendChild(column);
@@ -602,7 +607,7 @@ const Game = (function(){
 	function calcHeight() {
 		let h1 = Math.floor($(_board).height() * 0.9 / config.rows);
 		let boardWidth = $(_board).width();
-		let colCount = $('.column', _board).length;
+		let colCount = _board.querySelectorAll('.column').length;
 		let colWidth = 1/colCount - 0.02;
 		let w2 = Math.floor(boardWidth * colWidth);
 		//var w2 = Math.floor(boardWidth * 0.18);
@@ -620,9 +625,9 @@ const Game = (function(){
 		let totalHeight = config.cardHeight * 3 + margin * 4;
 		debug("Card height=" + config.cardHeight + ', margin = ' + margin + ", Total height = " + totalHeight);
 		return {
-			'height': config.cardHeight,
-			'margin-top': margin,
-			'margin-bottom': margin
+			'height': config.cardHeight + 'px',
+			'margin-top': margin + 'px',
+			'margin-bottom': margin + 'px'
 		};
 	}
 
@@ -649,20 +654,25 @@ const Game = (function(){
 
 	function resizeCards() {
 		calcCardSize();
-		$('.card', _board).css(cardCss());
-		$('.cardHolder', _board).css(cardHolderCss());
+		const cardStyles = cardCss();
+		const holderStyles = cardHolderCss();
+		_board.querySelectorAll('.card').forEach((card) => applyStyle(card, cardStyles));
+		_board.querySelectorAll('.cardHolder').forEach((el) => applyStyle(el, holderStyles));
 
 		let bw = $(_board).width();
 		let colMargin = Math.floor(bw * 0.01);
 
-		$('.column', _board).css({
-			'width': config.cardWidth,
+		const columnStyle = {
+			'width': config.cardWidth + 'px',
 			'margin-right': '' + colMargin + 'px',
 			'margin-left': '' + colMargin + 'px',
-		});
-		let colCount = document.querySelectorAll('.column').length;
+		};
+
+		const cols = _board.querySelectorAll('.column');
+		cols.forEach((el) => applyStyle(el, columnStyle));
+		let colCount = cols.length;
 		let realWidth = (config.cardWidth + colMargin * 2) * colCount;
-		$('#columns').width(realWidth);
+		document.getElementById('columns').style.width = realWidth + 'px';
 	}
 
 	function resize() {
@@ -678,13 +688,13 @@ const Game = (function(){
 		};
 		_players.map(player => 'padding-' + player.position).forEach(property => css[property] = playerPadding);
 		// apply paddings
-		$('#gameContainer').css(css);
+		applyStyle(document.getElementById('gameContainer'), css);
 		// recalculate cards
 		let newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
 			resizeCards();
 		}
-		['top','bottom','right','left'].forEach((side) => resizePlayers('player-'+side));
+		['top','bottom','right','left'].forEach((side) => resizePlayers('player-' + side));
 
 	}
 
@@ -716,7 +726,7 @@ const Game = (function(){
 	function init() {
 		_board = document.getElementById("gameBoard");
 
-		$('#gameInfo').html(version);
+		document.getElementById('#gameInfo').innerHTML = version;
 
 		let offset = $(_board).offset();
 		boardPadding = offset.top;
@@ -963,7 +973,7 @@ const Game = (function(){
 		} else {
 			t.remove();
 			playerFail();
-			cards().removeClass('hint selected');
+			cards().forEach((c) => c.classList.remove('hint', 'selected'));
 		}
 
 	}
@@ -1018,9 +1028,7 @@ const Game = (function(){
 
 	function checkSet(selection) {
 		if (selection.length < 3) return false;
-		const c1 = selection[0].card;
-		const c2 = selection[1].card;
-		const c3 = selection[2].card;
+		const [c1, c2, c3] = [...selection].map(c => c.card);
 		return checkAttribute(c1.color, c2.color, c3.color) &&
 			checkAttribute(c1.fill, c2.fill, c3.fill) &&
 			checkAttribute(c1.shape, c2.shape, c3.shape) &&
@@ -1040,13 +1048,15 @@ const Game = (function(){
 	};
 
 	function cards() {
-		return $('.card', _board);
+		return _board.querySelectorAll('.card');
 	}
 
 	function hint(btn) {
 		let set = findSet();
 
-		if (config.showSetOnHint) cards().removeClass('hint selected');
+		if (config.showSetOnHint) {
+			cards().forEach((card) => card.classList.remove('hint', 'selected'));
+		}
 		if (set) {
 			//instruction('Set exists!', 'green', 2000);
 			if (config.showSetOnHint) $(set).addClass('hint');
@@ -1063,39 +1073,44 @@ const Game = (function(){
 			return;
 		}
 
-		$(card).removeClass('hint').toggleClass('selected');
-		let selection = $('.card.selected', _board);
+		card.classList.remove('hint')
+		card.classList.toggle('selected');
+		let selection = _board.querySelectorAll('.card.selected');
 		if (selection.length == 3) {
 			_selectionDone = true;
 			clearTimers();
-			window.setTimeout(function(){
-				checkSelection();
-			}, 300);
+			window.setTimeout(checkSelection, 300);
 		}
 	}
 
 	function checkSelection() {
-		let check = [];
-		let selection = $('.card.selected', _board);
-
-		selection.each(function() { check.push(this) });
-		cards().removeClass('hint selected');
+		let selection = _board.querySelectorAll('.card.selected');
+		cards().forEach((card) => card.classList.remove('hint', 'selected'));
 		_selectionDone = false;
 
-		if (checkSet(check)) {
+		if (checkSet(selection)) {
 			// correct SET
-			selection.remove();
-			let columns = $('#gameBoard .column');
-			let movers = $('.column:last .card',_board);
+			selection.forEach((el) => el.remove());
+			let columns = _board.querySelectorAll('.column');
 			let moveIndex = 0;
 			if (columns.length == config.maxColumns) {
+				const lastColumn = columns.item(columns.length-1);
+				const movers = lastColumn.querySelectorAll('.card');
+				for (let col = 0; col < columns.length-1; col++) {
+					const holders = columns.item(col).querySelectorAll('.cardHolder');
+					holders.forEach((holder) => {
+						if (!holder.hasChildNodes()) {
+							holder.appendChild(movers.item(moveIndex++));
+						}
+					});
+				}
 				$('.column',_board).not(':last').find('.cardHolder').each(function(){
 					if (!this.hasChildNodes()) {
 						var card = movers.eq(moveIndex++);
 						this.appendChild(card.get(0));
 					}
 				});
-				$('.column:last', _board).remove();
+				columns.item(columns.length-1).remove();
 				onColumnNumberChange();
 				debug("1 column removed");
 			} else {
