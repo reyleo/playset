@@ -97,14 +97,14 @@ Player.prototype.setPosition = function(position) {
 
 Player.prototype.increaseWins = function() {
 	this.wins++;
-	this.area.find('.win-counter').html(this.wins);
-	this.area.removeClass('clicked');
+	this.area.querySelector('.win-counter').innerHTML = this.wins;
+	this.area.classList.remove('clicked');
 };
 
 Player.prototype.increaseFails = function() {
 	this.fails++;
-	this.area.find('.fail-counter').html(this.fails);
-	this.area.removeClass('clicked');
+	this.area.querySelector('.fail-counter').innerHTML = this.fails;
+	this.area.classList.remove('clicked');
 };
 
 const Status = { active: 0, pause: 1, over: 2 };
@@ -161,7 +161,7 @@ const Game = (function(){
 	}
 
 	function updateTime (timer) {
-		_clockWidget.html(timer.toString());
+		_clockWidget.innerHTML = timer.toString();
 		//saveTime(timer);
 	}
 
@@ -175,7 +175,7 @@ const Game = (function(){
 
 	function showTime () {
 		if (isTimerOn()) {
-			_clockWidget.show();
+			_show(_clockWidget);
 		}
 	}
 
@@ -211,9 +211,9 @@ const Game = (function(){
 					_clockTimer.setTime(state.timer);
 					updateTime(_clockTimer);
 				}
-				_clockWidget.show();
+				_show(_clockWidget);
 			} else {
-				_clockWidget.hide();
+				_hide(_clockWidget);
 			}
 
 			if (_status == Status.over) {
@@ -223,6 +223,14 @@ const Game = (function(){
 		}
 		return false;
 	}
+
+	function _show(el) {
+		el.style.display = '';
+	}
+	function _hide(el) {
+		el.style.display = 'none';
+	}
+
 
 	function saveTime(timer) {
 		if (_isStorageAvailable) {
@@ -391,7 +399,7 @@ const Game = (function(){
 			}
 		});
 		//debug("Max points " + maxPoints + ", winners = " + winners.length);
-		winners.forEach((p) => p.area.addClass('winner'));
+		winners.forEach((winner) => winner.area.classList.add('winner'));
 	}
 
 	function newTopResult(time) {
@@ -401,7 +409,7 @@ const Game = (function(){
 				month: 'numeric', year: 'numeric', day: 'numeric'
 			})
 		} else {
-			formatted = (new Date()).toISOString().substr(0, 10)
+			formatted = (new Date()).toISOString().substring(0, 10)
 		}
 		return {
 			time: time,
@@ -540,11 +548,11 @@ const Game = (function(){
 		}
 		_clockTimer.stop();
 		if (_players.length > 1) {
-			_clockWidget.hide();
+			_hide(_clockWidget);
 		} else {
 			_clockTimer.stop();
 			_clockTimer.start();
-			_clockWidget.show();
+			_show(_clockWidget);
 		}
 		deal();
 		checkForMore();
@@ -711,7 +719,7 @@ const Game = (function(){
 		if (_status != Status.active && _status != Status.pause) return;
 		if (_clockTimer.isRunning()) {
 			_clockTimer.pause();
-			_clockWidget.html('Paused');
+			_clockWidget.innerHTML = 'Paused';
 			$(_board).hide();
 			_userPause = true;
 			save();
@@ -726,7 +734,7 @@ const Game = (function(){
 	function init() {
 		_board = document.getElementById("gameBoard");
 
-		document.getElementById('#gameInfo').innerHTML = version;
+		document.getElementById('gameInfo').innerHTML = version;
 
 		let offset = $(_board).offset();
 		boardPadding = offset.top;
@@ -748,9 +756,10 @@ const Game = (function(){
 		}
 
 		_counter = document.getElementById('counter');
-		_clockWidget = $('<div>').addClass('game-timer noselect');
-		_clockWidget.appendTo($('body')).hide();
-		_clockWidget.on(_eventName, clickPause);
+		_clockWidget = el('div','game-timer', 'noselect');
+		_clockWidget.style.display = 'none';
+		document.body.appendChild(_clockWidget);
+		_clockWidget.addEventListener(_eventName, clickPause);
 
 		$(_board).on(_eventName, '.card', function() {
 			onCardSelect(this);
@@ -822,7 +831,7 @@ const Game = (function(){
 	function setup() {
 		showDialog('#setupDialog');
 		$(_board).hide();
-		_clockWidget.hide();
+		_hide(_clockWidget);
 		if (!_userPause) {
 			_clockTimer.pause();
 		}
@@ -875,36 +884,40 @@ const Game = (function(){
 	}
 
 	function createArea(player) {
-		let area = $('<div class="player-area noselect"></div>');
-		let contents = $('<div class="player-contents"></div');
-		area.addClass(player.class).appendTo($('body'));
+		let area = document.createElement('div');
+		area.classList.add('player-area', 'noselect', player.class);
+		let contents = document.createElement('div');
+		contents.classList.add('player-contents');
+		document.body.insertAdjacentElement('beforeend', area);
 		resizePlayers(player.class);
 		if (player.position == 'bottom' || player.position == 'left') {
-			contents.append('<div class="win-counter">' + player.wins + '</div>')
-			contents.append('<div class="fail-counter">' + player.fails + '</div>')
+			contents.insertAdjacentHTML('beforeend', '<div class="win-counter">' + player.wins + '</div>');
+			contents.insertAdjacentHTML('beforeend', '<div class="fail-counter">' + player.fails + '</div>');
 		} else {
-			contents.append('<div class="fail-counter">' + player.fails + '</div>')
-			contents.append('<div class="win-counter">' + player.wins + '</div>')
+			contents.insertAdjacentHTML('beforeend', '<div class="fail-counter">' + player.fails + '</div>');
+			contents.insertAdjacentHTML('beforeend', '<div class="win-counter">' + player.wins + '</div>');
 		}
-		area.append(contents);
+		area.appendChild(contents);
 		//area.append('<div>' + (_setup.player+1) + '</div>');
 		player.area = area;
-		area.data('player', player.id);
+		area.dataset.player = player.id;
 		return area;
 	}
 
 	function initPlayers() {
-		$('.player-area').on(_eventName, onPlayerAreaClick);
+		document.querySelectorAll('.player-area').forEach((area) => {
+			area.addEventListener(_eventName, onPlayerAreaClick);
+		});
 	}
 
-	function onPlayerAreaClick() {
+	function onPlayerAreaClick(ev) {
 		// do not react on user click if game is over
 		// debug('Game status = ' + _status);
 		if (_status == Status.over) return;
 		if (isSinglePlayer()) return;
 		// exit if not first :)
-		let clicked = $(this);
-		let clickedId = clicked.data('player');
+		let clicked = ev.target;
+		let clickedId = clicked.dataset.player;
 
 		if (_player != null) {
 			// current player cannot go to queue
@@ -914,7 +927,7 @@ const Game = (function(){
 		} else {
 			$('#gameMessage').hide();
 			_player = _players[clickedId];
-			clicked.addClass('clicked');
+			clicked.classList.add('clicked');
 			// Ensure Queue is empty
 			emptyQueue();
 			// Timer
@@ -924,7 +937,7 @@ const Game = (function(){
 
 	function emptyQueue() {
 		if (_queue.length == 0) return;
-		_queue.forEach(player => player.area.removeClass('queue'));
+		_queue.forEach(player => player.area.classList.remove('queue'));
 		_queue = [];
 	}
 
@@ -932,21 +945,22 @@ const Game = (function(){
 		if (_queue.some(p => p.id === player.id)) return;
 		_queue.push(player);
 		debug('Player ' + player.id + ' added to queue');
-		player.area.addClass('queue');
+		player.area.classList.add('queue');
 	}
 
 	function nextInQueue() {
 		if (_queue.length > 0) {
 			_player = _queue.shift();
 			debug('Player ' + _player.id + ' taken from queue');
-			_player.area.removeClass('queue').addClass('clicked');
+			_player.area.classList.remove('queue')
+			_player.area.classList.add('clicked');
 			startTimer(_player.area);
 		}
 	}
 
 	function startTimer(area) {
 		_countDown = config.maxTime + 1;
-		$('<div class="player-timer"></div>').insertBefore(area[0].firstChild);
+		area.prepend(el('div','player-timer'));
 		timerEvent();
 	}
 
@@ -958,15 +972,20 @@ const Game = (function(){
 		$('.player-timer').remove();
 	}
 
+	function el(tag, ...classes) {
+		const elem = document.createElement(tag);
+		elem.classList.add(...classes);
+		return elem;
+	}
 
 	function timerEvent() {
 		_countDown--;
 		const percent = 100 * (config.maxTime - _countDown) / config.maxTime;
-		let t = _player.area.find('.player-timer');
+		let t = _player.area.querySelector('.player-timer');
 		if (_player.layout == 'horizontal') {
-			t.css('width', percent +'%');
+			Object.assign(t.style, {'width': percent +'%'});
 		} else {
-			t.css('height', percent +'%');
+			Object.assign(t.style, {'height': percent +'%'});
 		}
 		if (_countDown > 0) {
 			_timer = window.setTimeout(timerEvent, 1000);
@@ -1135,7 +1154,7 @@ const Game = (function(){
 	function autoPlay(delay = 500) {
 		let set = findSet();
 		if (set != null) {
-			$(set).addClass('selected');
+			set.forEach((card) => card.classList.add('selected'));
 
 			// select random player
 			var index = Math.floor(Math.random() * _players.length);
