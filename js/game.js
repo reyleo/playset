@@ -28,7 +28,7 @@ Card.prototype.render = function(cardElem) {
 		}
 
 		let group = document.createElement('div');
-		group.className = 'group' + " group" + this.quantity;
+		group.classList.add('group', 'group' + this.quantity);
 		for (let i = 0; i < this.quantity; i++) {
 			group.appendChild(this.createSymbol());
 		}
@@ -108,6 +108,30 @@ Player.prototype.increaseFails = function() {
 };
 
 const Status = { active: 0, pause: 1, over: 2 };
+
+function applyStyle(el, obj) {
+	Object.assign(el.style, obj);
+}
+function _show(el) {
+	el.style.display = 'block';
+}
+function _hide(el) {
+	el.style.display = 'none';
+}
+function _id(id) {
+	return document.getElementById(id);
+}
+function _q(select) {
+	return document.querySelector(select);
+}
+function _visible(e) {
+	return e.offsetHeight > 0 || e.offsetWidth > 0;
+}
+function _el(tag, ...classList) {
+	const el = document.createElement(tag);
+	el.classList.add(...classList);
+	return el;
+}
 
 const Game = (function(){
 
@@ -224,14 +248,6 @@ const Game = (function(){
 		return false;
 	}
 
-	function _show(el) {
-		el.style.display = '';
-	}
-	function _hide(el) {
-		el.style.display = 'none';
-	}
-
-
 	function saveTime(timer) {
 		if (_isStorageAvailable) {
 			localStorage.setItem('time', timer.getTime());
@@ -330,20 +346,15 @@ const Game = (function(){
 		}
 	};
 
-	function applyStyle(el, obj) {
-		Object.assign(el.style, obj);
-	}
-
 	function placeCard(place, card, animate) {
-		let elem = document.createElement('div');
-		elem.classList.add('card');
-		applyStyle(elem, cardCss());
-		elem.card = card;
-		card.render(elem);
+		let cardElem = _el('div','card');
+		applyStyle(cardElem, cardCss());
+		cardElem.card = card;
+		card.render(cardElem);
 		if (animate) {
-			elem.classList.add('animate')
+			cardElem.classList.add('animate')
 		}
-		place.appendChild(elem);
+		place.appendChild(cardElem);
 	}
 
 	function checkForMore() {
@@ -447,7 +458,7 @@ const Game = (function(){
 			}
 			list.appendChild(item);
 		});
-		showDialog('#topResults');
+		showDialog('topResults');
 	}
 
 	function clearTopResults() {
@@ -600,12 +611,10 @@ const Game = (function(){
 	}
 
 	function appendColumn() {
-		let column = document.createElement("div");
-		column.classList.add('column');
+		let column = _el('div', 'column');
 		column.style.width = config.cardWidth + 'px';
 		for (let j = 0; j < config.rows; j++) {
-			let cardHolder = document.createElement("div");
-			cardHolder.classList.add("cardHolder");
+			let cardHolder = _el('div', 'cardHolder');
 			applyStyle(cardHolder, cardHolderCss());
 			column.appendChild(cardHolder);
 		}
@@ -773,7 +782,7 @@ const Game = (function(){
 
 		$('#setupDialog .button').on(_eventName, function() {
 			let count = parseInt(this.innerHTML);
-			hideDialog('#setupDialog');
+			hideDialog('setupDialog');
 			createPlayers(count);
 			runSetup();
 		});
@@ -790,7 +799,7 @@ const Game = (function(){
 
 
 		$('#setupDialog .close').on(_eventName, function() {
-			hideDialog('#setupDialog');
+			hideDialog('setupDialog');
 			if (!_userPause) {
 				$(_board).show();
 				if (_status == Status.active) {
@@ -829,7 +838,7 @@ const Game = (function(){
 	}
 
 	function setup() {
-		showDialog('#setupDialog');
+		showDialog('setupDialog');
 		$(_board).hide();
 		_hide(_clockWidget);
 		if (!_userPause) {
@@ -884,10 +893,8 @@ const Game = (function(){
 	}
 
 	function createArea(player) {
-		let area = document.createElement('div');
-		area.classList.add('player-area', 'noselect', player.class);
-		let contents = document.createElement('div');
-		contents.classList.add('player-contents');
+		let area = _el('div', 'player-area', 'noselect', player.class);
+		let contents = _el('div', 'player-contents');
 		document.body.insertAdjacentElement('beforeend', area);
 		resizePlayers(player.class);
 		if (player.position == 'bottom' || player.position == 'left') {
@@ -1255,35 +1262,25 @@ function hideTopMessage() {
 }
 
 function showDialog(id) {
-	const dlg = $(id);
-	let wh = window.innerHeight;
-	let ww = window.innerWidth;
-	dlg.parent().show();
-	let dw = dlg.width();
-	let dh;
-	let innerHeight = 0;
-	dlg.children().each(function () {
-		innerHeight += this.clientHeight;
-	});
-	dh = innerHeight;
+	const dlg = _id(id);
+	_show(dlg.parentNode);
+	let dw = dlg.offsetWidth;
+	let dh = dlg.offsetHeight;
+	const ww = window.innerWidth;
+	const wh = window.innerHeight;
+	dw = Math.min(dw, ww);
+	dh = Math.min(dh, wh);
 
-	if (dw > ww) {
-		dw = ww;
-	}
-	if (dh > wh) {
-		dh = wh;
-	}
-
-	dlg.css({
-		top: Math.max(Math.round((wh - dh)/2), 0),
-		left: Math.max(Math.round((ww - dw)/2), 0),
-		height: dh,
-		width: dw
+	applyStyle(dlg, {
+		top: Math.max(Math.round((wh - dh)/2), 0) + 'px',
+		left: Math.max(Math.round((ww - dw)/2), 0) + 'px',
+		height: dh + 'px',
+		width: dw + 'px'
 	});
 }
 
 function hideDialog(id) {
-	$(id).parent().hide();
+	_hide(_id(id).parentNode);
 }
 
 function toLocaleDateStringSupportsLocales() {
@@ -1311,7 +1308,7 @@ function storageAvailable() {
 /**
  * Document ready
  */
-$(function(){
+document.addEventListener("DOMContentLoaded", function() {
 
 
 	let eventName = 'click';
@@ -1327,53 +1324,46 @@ $(function(){
 	}, 10);
 
 
-	$('#btnHint').on(eventName, function(){
-		Game.hint(this);
+	_id('btnHint').addEventListener(eventName, function(ev) {
+		Game.hint(ev.target);
 		menuSwitch();
 	});
 
-	$('#btnMore').on(eventName, function(){
-		Game.more();
-		menuSwitch();
-	});
-
-	$('#btnStart').on(eventName, function(){
+	_id('btnStart').addEventListener(eventName, function(){
 		Game.restart();
 		menuSwitch();
 	});
 
-	$('#btnReplay').on(eventName, function(){
-		if ($(this).hasClass('disabled')) return;
+	_id('btnReplay').addEventListener(eventName, function(ev){
+		if (ev.target.classList.contains('disabled')) return;
 		Game.replay();
 		menuSwitch();
 	});
 
-	$('#menuSwitch').on(eventName, menuSwitch );
+	_id('menuSwitch').addEventListener(eventName, menuSwitch );
 
-	$('#btnSetup').on(eventName, function() {
+	_id('btnSetup').addEventListener(eventName, function() {
 		Game.setup();
 	});
 
-	$('#topResults .close').on(eventName, function (){
-		$(this).closest('.dialog').parent().hide();
+	_q('#topResults .close').addEventListener(eventName, function(ev) {
+		_hide(ev.target.closest('.dialog').parentNode);
 	});
 
-	$('#btnTop').on(eventName, function(){
+	_id('btnTop').addEventListener(eventName, function(){
 		Game.topResults();
 		menuSwitch();
 	});
 
-	$(window).on('resize', function(){
-		Game.resize();
-	});
+	window.addEventListener('resize', () => Game.resize());
 });
 
 function menuSwitch() {
-	let menu = $('#controls');
-	if (menu.is(':visible')) menu.hide();
+	const menu = _id('controls');
+	if (_visible(menu)) _hide(menu);
 	else {
-		$('#btnReplay',menu).toggleClass('disabled', Game.status() !== Status.over);
-		menu.show(0);
+		_id('btnReplay').classList.toggle('disabled', Game.status() !== Status.over);
+		_show(menu);
 	}
 }
 return Game;
