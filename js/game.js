@@ -1,6 +1,6 @@
-const _Game = (function($){
+const _Game = (function(){
 
-const version = "0.113";
+const version = "0.2.1";
 const svgNS = "http://www.w3.org/2000/svg";
 const xlinkNS = "http://www.w3.org/1999/xlink";
 
@@ -99,12 +99,16 @@ Player.prototype.increaseWins = function() {
 	this.wins++;
 	this.area.querySelector('.win-counter').innerHTML = this.wins;
 	this.area.classList.remove('clicked');
+	const timer = this.area.querySelector('.player-timer');
+	if (timer) timer.remove();
 };
 
 Player.prototype.increaseFails = function() {
 	this.fails++;
 	this.area.querySelector('.fail-counter').innerHTML = this.fails;
 	this.area.classList.remove('clicked');
+	const timer = this.area.querySelector('.player-timer');
+	if (timer) timer.remove();
 };
 
 const Status = { active: 0, pause: 1, over: 2 };
@@ -113,9 +117,11 @@ function applyStyle(el, obj) {
 	Object.assign(el.style, obj);
 }
 function _show(el) {
+	if (!el) return;
 	el.style.display = 'block';
 }
 function _hide(el) {
+	if (!el) return;
 	el.style.display = 'none';
 }
 function _id(id) {
@@ -123,6 +129,9 @@ function _id(id) {
 }
 function _q(select) {
 	return document.querySelector(select);
+}
+function _qa(select) {
+	return document.querySelectorAll(select);
 }
 function _visible(e) {
 	return e.offsetHeight > 0 || e.offsetWidth > 0;
@@ -368,7 +377,6 @@ const Game = (function(){
 				}
 			}
 		}
-
 		if (setNotFound) {
 			gameOver();
 		}
@@ -380,19 +388,19 @@ const Game = (function(){
 		_clockTimer.stop();
 		updateTime(_clockTimer);
 		// save top result if all cards played
+		let topResult = false;
 		if (isSinglePlayer() && _cardsLeft == 0 && !_replayMode) {
 			// get time in msec
-			var time = _clockTimer.getTime();
-			var position = checkTopResult(time);
+			const time = _clockTimer.getTime();
+			const position = checkTopResult(time);
 			if (position !== -1) {
+				topResult = true;
 				showTopResults(position);
 			}
 		}
 		save();
-		if (_cardsLeft == 0) {
-			instruction("Game over!", 'normal', 2000);
-		} else {
-			instruction("No more sets", 'normal', 2000);
+		if (!topResult) {
+			instruction("Game over", 'normal', 2000);
 		}
 	}
 
@@ -622,8 +630,8 @@ const Game = (function(){
 	}
 
 	function calcHeight() {
-		let h1 = Math.floor($(_board).height() * 0.9 / config.rows);
-		let boardWidth = $(_board).width();
+		let h1 = Math.floor(_board.offsetHeight * 0.9 / config.rows);
+		let boardWidth = _board.offsetWidth;
 		let colCount = _board.querySelectorAll('.column').length;
 		let colWidth = 1/colCount - 0.02;
 		let w2 = Math.floor(boardWidth * colWidth);
@@ -676,7 +684,7 @@ const Game = (function(){
 		_board.querySelectorAll('.card').forEach((card) => applyStyle(card, cardStyles));
 		_board.querySelectorAll('.cardHolder').forEach((el) => applyStyle(el, holderStyles));
 
-		let bw = $(_board).width();
+		let bw = _board.offsetWidth;
 		let colMargin = Math.floor(bw * 0.01);
 
 		const columnStyle = {
@@ -729,15 +737,23 @@ const Game = (function(){
 		if (_clockTimer.isRunning()) {
 			_clockTimer.pause();
 			_clockWidget.innerHTML = 'Paused';
-			$(_board).hide();
+			_hide(_board);
 			_userPause = true;
 			save();
 		} else {
 			_clockTimer.start();
-			$(_board).show();
+			_show(_board);
 			_userPause = false;
 		}
 		e.preventDefault();
+	}
+
+	function lookUp(root, el, filter) {
+		while (el !== root && el !== null) {
+			if (filter(el)) return el;
+			el = el.parentNode;
+		}
+		return null;
 	}
 
 	function init() {
@@ -745,17 +761,13 @@ const Game = (function(){
 
 		document.getElementById('gameInfo').innerHTML = version;
 
-		let offset = $(_board).offset();
-		boardPadding = offset.top;
+		boardPadding = _board.offsetTop;
 		_isStorageAvailable = storageAvailable();
 
 		for (let i = 0; i < config.columns; i++) {
 			appendColumn();
 		}
-		//calcCardSize();
-
 		const MAX_VAL = 2;
-
 		//
 		// event handlers
 		//
@@ -770,38 +782,52 @@ const Game = (function(){
 		document.body.appendChild(_clockWidget);
 		_clockWidget.addEventListener(_eventName, clickPause);
 
-		$(_board).on(_eventName, '.card', function() {
-			onCardSelect(this);
+		const isCardElement = function(e) {
+			return e.nodeType == Node.ELEMENT_NODE && e.classList.contains('card');
+		};
+
+		_board.addEventListener(_eventName, function (ev) {
+			const card = lookUp(_board, ev.target, isCardElement);
+			if (card != null) {
+				ev.stopPropagation();
+				onCardSelect(card);
+			}
 		});
 
-		$(_board).on('dblclick', '.card', function(event) {
+		const stopPropagation = function(event) {
 			event.stopPropagation();
 			event.preventDefault();
 			return false;
-		});
+		};
 
-		$('#setupDialog .button').on(_eventName, function() {
-			let count = parseInt(this.innerHTML);
-			hideDialog('setupDialog');
-			createPlayers(count);
-			runSetup();
-		});
+		_board.addEventListener('dblclick', stopPropagation);
 
-		$('#setupDialog #keepScore')
-			.on(_eventName, function() {
-				var newval = !this.checked;
-				this.checked = newval;
+		_qa('#setupDialog .button').forEach(
+			(btn) => btn.addEventListener(_eventName,
+				function () {
+					let count = parseInt(this.innerHTML);
+					hideDialog('setupDialog');
+					createPlayers(count);
+					runSetup();
+				})
+		);
+
+		const keepScoreConfig = _q('#keepScore')
+		keepScoreConfig.addEventListener(_eventName, function(ev) {
+				const el = ev.target;
+				var newval = !el.checked;
+				el.checked = newval;
 				config.keepScore = newval;
-				this.className = "check " + (this.checked ? 'check-on' : 'check-off');
-			})
-			.addClass(config.keepScore ? 'check-on' : 'check-off')
-			.prop('checked', config.keepScore);
+				this.className = "check " + (el.checked ? 'check-on' : 'check-off');
+			});
+		keepScoreConfig.classList.add(config.keepScore ? 'check-on' : 'check-off')
+		keepScoreConfig.checked = config.keepScore;
 
 
-		$('#setupDialog .close').on(_eventName, function() {
+		_q('#setupDialog .close').addEventListener(_eventName, function() {
 			hideDialog('setupDialog');
 			if (!_userPause) {
-				$(_board).show();
+				_show(_board);
 				if (_status == Status.active) {
 					startTime();
 				}
@@ -809,9 +835,7 @@ const Game = (function(){
 			showTime();
 		});
 
-		$('#topResults #clearResults').on(_eventName, function() {
-			clearTopResults();
-		});
+		_id('clearResults').addEventListener(_eventName, clearTopResults);
 
 		window.addEventListener('unload', escape);
 		window.addEventListener('pagehide', escape);
@@ -839,7 +863,7 @@ const Game = (function(){
 
 	function setup() {
 		showDialog('setupDialog');
-		$(_board).hide();
+		_hide(_board);
 		_hide(_clockWidget);
 		if (!_userPause) {
 			_clockTimer.pause();
@@ -847,47 +871,49 @@ const Game = (function(){
 		menuSwitch();
 	}
 
+	function onPlayerAreaSelect(event) {
+		let wh = window.innerHeight;
+		let ww = window.innerWidth;
+		let clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
+		let clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
+		let player = _players[_setup.player];
+		if (clickY < boardPadding) {
+			player.setPosition('top');
+		} else if (clickY > (wh - boardPadding)) {
+			player.setPosition('bottom');
+		} else if (clickX < boardPadding) {
+			player.setPosition('left');
+		} else if (clickX > (ww - boardPadding)) {
+			player.setPosition('right');
+		}
+		if (!player.isValid() ||
+				(isSinglePlayer() && player.isTopPosition())) {
+			window.setTimeout(setupPlayer, 1000);
+			instruction('Incorrect place', 'error');
+			return;
+		}
+
+		if (player.isValid()) {
+			createArea(player);
+			if (_setup.next && _setup.player < _players.length-1) {
+				_setup.player++;
+				window.setTimeout(setupPlayer, 10);
+			} else {
+				finishSetup();
+			}
+
+		}
+	}
+
 	function setupPlayer() {
 		instruction('Select area for player ' + (_setup.player + 1));
-		let player = _players[_setup.player];
-		$(document).one(_eventName, function(event){
-			let wh = window.innerHeight;
-			let ww = window.innerWidth;
-			let clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
-			let clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
-			if (clickY < boardPadding) {
-				player.setPosition('top');
-			} else if (clickY > (wh - boardPadding)) {
-				player.setPosition('bottom');
-			} else if (clickX < boardPadding) {
-				player.setPosition('left');
-			} else if (clickX > (ww - boardPadding)) {
-				player.setPosition('right');
-			}
-			if (!player.isValid() ||
-					(isSinglePlayer() && player.isTopPosition())) {
-				window.setTimeout(setupPlayer, 1000);
-				instruction('Incorrect place', 'error');
-				return;
-			}
-
-			if (player.isValid()) {
-				createArea(player);
-				if (_setup.next && _setup.player < _players.length-1) {
-					_setup.player++;
-					window.setTimeout(setupPlayer, 10);
-				} else {
-					finishSetup();
-				}
-
-			}
-		});
+		document.addEventListener(_eventName, onPlayerAreaSelect, { once: true });
 	}
 
 	function finishSetup() {
-		$(_board).show();
+		_show(_board);
 		resize();
-		$('#gameMessage').hide();
+		_hide(_id('gameMessage'));
 		initPlayers();
 		restart();
 	}
@@ -932,7 +958,7 @@ const Game = (function(){
 				addToQueue(_players[clickedId]);
 			}
 		} else {
-			$('#gameMessage').hide();
+			_hide(_id('gameMessage'));
 			_player = _players[clickedId];
 			clicked.classList.add('clicked');
 			// Ensure Queue is empty
@@ -976,7 +1002,6 @@ const Game = (function(){
 			window.clearTimeout(_timer);
 			_timer = null;
 		}
-		$('.player-timer').remove();
 	}
 
 	function el(tag, ...classes) {
@@ -990,9 +1015,9 @@ const Game = (function(){
 		const percent = 100 * (config.maxTime - _countDown) / config.maxTime;
 		let t = _player.area.querySelector('.player-timer');
 		if (_player.layout == 'horizontal') {
-			Object.assign(t.style, {'width': percent +'%'});
+			t.style.width = percent +'%';
 		} else {
-			Object.assign(t.style, {'height': percent +'%'});
+			t.style.height = percent +'%';
 		}
 		if (_countDown > 0) {
 			_timer = window.setTimeout(timerEvent, 1000);
@@ -1006,19 +1031,21 @@ const Game = (function(){
 
 	function resizePlayers(playerClass) {
 		// find same class players
-		let same = $('.' + playerClass);
+		let same = _qa('.' + playerClass);
 		let playerCount = same.length;
 		let size = 0, pos = boardPadding;
 		if (playerClass == 'player-top' || playerClass == 'player-bottom') {
 			size = Math.floor((window.innerWidth - boardPadding*2) / playerCount);
-			same.css('width', size).each(function(index){
-				$(this).css('left', pos);
+			same.forEach((p) => {
+				p.style.width = size + 'px';
+				p.style.left = pos + 'px';
 				pos += size;
 			});
 		} else if (playerClass == 'player-left' || playerClass == 'player-right') {
 			size = Math.floor((window.innerHeight - boardPadding*2) / playerCount);
-			same.css('height', size).each(function(index){
-				$(this).css('top', pos);
+			same.forEach((p) => {
+				p.style.height = size + 'px'
+				p.style.top = pos + 'px';
 				pos += size;
 			});
 		}
@@ -1032,24 +1059,26 @@ const Game = (function(){
 
 	function createPlayers(count) {
 		_players = [];
-		$('.player-area').remove();
-		for (var id = 0; id < count; id++) {
+		_qa('.player-area').forEach((area) => area.remove());
+		for (let id = 0; id < count; id++) {
 			_players.push(Player(id));
 		}
 	}
 
 	function instruction (html, style = 'normal', msec) {
-		var delay = (typeof msec == "number")? msec : 0;
-		var obj = $('#gameMessage');
-		obj.children().remove();
-		obj.html(html).attr('class', 'instruction ' + style).show();
+		let delay = (typeof msec == "number")? msec : 0;
+		let obj = _id('gameMessage');
+		obj.innerHTML = '';
+		obj.insertAdjacentHTML('afterbegin', html);
+		obj.classList.add('instruction', style);
+		_show(obj);
 		if (delay > 0) {
 			window.setTimeout(instructionOff, delay);
 		}
 	}
 
 	function instructionOff() {
-		$('#gameMessage').hide();
+		_hide(_id('gameMessage'));
 	}
 
 	function checkSet(selection) {
@@ -1067,9 +1096,9 @@ const Game = (function(){
 	}
 
 	function error(msg) {
-		$('#errorMessage').parent().show();
+		_show(_id('#errorMessage').parentNode);
 		window.setTimeout(function(){
-				$('#errorMessage').parent().hide();
+				_hide(_id('#errorMessage').parentNode);
 			}, 1000);
 	};
 
@@ -1085,7 +1114,9 @@ const Game = (function(){
 		}
 		if (set) {
 			//instruction('Set exists!', 'green', 2000);
-			if (config.showSetOnHint) $(set).addClass('hint');
+			if (config.showSetOnHint) {
+				set.forEach((card) => card.classList.add('hint'));
+			}
 		} else {
 			instruction('Not found!', 'error', 2000);
 			//showMessage('No set found', 1000);
@@ -1105,7 +1136,7 @@ const Game = (function(){
 		if (selection.length == 3) {
 			_selectionDone = true;
 			clearTimers();
-			window.setTimeout(checkSelection, 300);
+			window.setTimeout(checkSelection, 100);
 		}
 	}
 
@@ -1119,7 +1150,7 @@ const Game = (function(){
 			selection.forEach((el) => el.remove());
 			let columns = _board.querySelectorAll('.column');
 			let moveIndex = 0;
-			if (columns.length == config.maxColumns) {
+			if (columns.length > config.columns) {
 				const lastColumn = columns.item(columns.length-1);
 				const movers = lastColumn.querySelectorAll('.card');
 				for (let col = 0; col < columns.length-1; col++) {
@@ -1130,12 +1161,6 @@ const Game = (function(){
 						}
 					});
 				}
-				$('.column',_board).not(':last').find('.cardHolder').each(function(){
-					if (!this.hasChildNodes()) {
-						var card = movers.eq(moveIndex++);
-						this.appendChild(card.get(0));
-					}
-				});
 				columns.item(columns.length-1).remove();
 				onColumnNumberChange();
 				debug("1 column removed");
@@ -1149,13 +1174,18 @@ const Game = (function(){
 
 
 		} else {
-
-			// ERROR!
-			error("Oops!");
+			wrongSet(selection);
 			playerFail();
 		}
 
 		save();
+	}
+
+	function wrongSet(selection) {
+		selection.forEach((card) => card.classList.add("wrong-selection"));
+		window.setTimeout(() => {
+			selection.forEach((card) => card.classList.remove("wrong-selection"));
+		}, 500);
 	}
 
 	function autoPlay(delay = 500) {
@@ -1224,42 +1254,6 @@ const Game = (function(){
 		debugOn: function() { _debug = true; }
 	};
 })();
-
-function showTooltip(target, text, msec) {
-	let tip = document.getElementById('toolbarTip');
-	tip.style.visibility = 'hidden';
-	tip.style.display = 'block';
-	let tt = $(tip);
-	tip.innerHTML = text;
-	let pos = target.offset();
-	let width = tt.get(0).clientWidth;
-	tip.style.display = 'none';
-	tip.style.visibility = 'visible';
-	tt.css({
-		top: pos.top,
-		left: pos.left - width
-	});
-	tt.fadeIn(200);
-
-	window.setTimeout(function(){
-		tt.fadeOut(400);
-		}, msec);
-
-}
-
-function showTopMessage(text, mseconds = 1000) {
-	let m = $('#message');
-	m.text(text);
-	m.css('top','-' + m.css('height'));
-	m.animate({"top":0}, 500);
-	window.setTimeout(hideTopMessage, mseconds);
-}
-
-function hideTopMessage() {
-	let m = $('#message');
-	let top = '-' + m.css('height');
-	m.animate({"top": top}, 500);
-}
 
 function showDialog(id) {
 	const dlg = _id(id);
@@ -1367,4 +1361,4 @@ function menuSwitch() {
 	}
 }
 return Game;
-})(window.jQuery);
+})();

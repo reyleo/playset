@@ -82,6 +82,10 @@
 		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
 		background-color: #AAA;
 	}
+	.wrong-selection {
+		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
+		background-color: #A00;
+	}
 	.hint {
 		background-color: #ec0;
 	}
