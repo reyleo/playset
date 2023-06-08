@@ -1,6 +1,6 @@
 const _Game = (function(){
 
-const version = "0.2.1";
+const version = "0.2.2";
 const svgNS = "http://www.w3.org/2000/svg";
 const xlinkNS = "http://www.w3.org/1999/xlink";
 
@@ -874,8 +874,8 @@ const Game = (function(){
 	function onPlayerAreaSelect(event) {
 		let wh = window.innerHeight;
 		let ww = window.innerWidth;
-		let clickX = _eventName == 'click' ? event.pageX : event.originalEvent.touches[0].pageX;
-		let clickY = _eventName == 'click' ? event.pageY : event.originalEvent.touches[0].pageY;
+		let clickX = _eventName == 'click' ? event.pageX : event.targetTouches.item(0).pageX;
+		let clickY = _eventName == 'click' ? event.pageY : event.targetTouches.item(0).pageY;
 		let player = _players[_setup.player];
 		if (clickY < boardPadding) {
 			player.setPosition('top');

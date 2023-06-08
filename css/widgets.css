@@ -183,7 +183,7 @@ svg.icon {
 	text-align: center;
 	top: 50%;
 	margin-top: -18pt;
-	width: 60%;
+	width: auto;
 	margin-left: 20%;
 	margin-right: 20%;
 	border-radius: 12pt;
