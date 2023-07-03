@@ -111,7 +111,7 @@ Player.prototype.increaseFails = function() {
 	if (timer) timer.remove();
 };
 
-const Status = { active: 0, pause: 1, over: 2 };
+const Status = { active: 0, pause: 1, over: 2, init: 3 };
 
 function applyStyle(el, obj) {
 	Object.assign(el.style, obj);
@@ -138,7 +138,8 @@ function _visible(e) {
 }
 function _el(tag, ...classList) {
 	const el = document.createElement(tag);
-	el.classList.add(...classList);
+	const valid = classList.filter((cl) => !!cl);
+	if (valid.length > 0) el.classList.add(...valid);
 	return el;
 }
 
@@ -235,6 +236,10 @@ const Game = (function(){
 			_replayMode = !!state.replayMode;
 			if (state.topResults) _topResults = state.topResults;
 
+			const playerIsValid = (data) => data.class && data.class !== '';
+			if (!state.players || state.players.length == 0 || !state.players.every(playerIsValid)) {
+				return false;
+			}
 			loadPlayers(state.players);
 			fillBoard(state.board);
 			if (isSinglePlayer()) {
@@ -301,8 +306,8 @@ const Game = (function(){
 		return newPlayer;
 	}
 
-	function loadPlayers(players) {
-		_players = players.map(buildPlayerWithArea);
+	function loadPlayers(playersData) {
+		_players = playersData.map(buildPlayerWithArea);
 		initPlayers();
 	}
 
@@ -826,6 +831,7 @@ const Game = (function(){
 
 		_q('#setupDialog .close').addEventListener(_eventName, function() {
 			hideDialog('setupDialog');
+			_show(_id('menuSwitch'));
 			if (!_userPause) {
 				_show(_board);
 				if (_status == Status.active) {
@@ -868,7 +874,9 @@ const Game = (function(){
 		if (!_userPause) {
 			_clockTimer.pause();
 		}
-		menuSwitch();
+		menuSwitch('off');
+		_hide(_id('menuSwitch'))
+		_status = Status.init;
 	}
 
 	function onPlayerAreaSelect(event) {
@@ -889,7 +897,7 @@ const Game = (function(){
 		if (!player.isValid() ||
 				(isSinglePlayer() && player.isTopPosition())) {
 			window.setTimeout(setupPlayer, 1000);
-			instruction('Incorrect place', 'error');
+			instruction('Incorrect place', 'red');
 			return;
 		}
 
@@ -912,6 +920,7 @@ const Game = (function(){
 
 	function finishSetup() {
 		_show(_board);
+		_show(_id('menuSwitch'));
 		resize();
 		_hide(_id('gameMessage'));
 		initPlayers();
@@ -1065,11 +1074,13 @@ const Game = (function(){
 		}
 	}
 
-	function instruction (html, style = 'normal', msec) {
+	function instruction(html, style = 'normal', msec) {
 		let delay = (typeof msec == "number")? msec : 0;
 		let obj = _id('gameMessage');
-		obj.innerHTML = '';
-		obj.insertAdjacentHTML('afterbegin', html);
+		let hdr = obj.firstChild;
+		hdr.innerHTML = '';
+		hdr.insertAdjacentText('afterbegin', html);
+		obj.className = '';
 		obj.classList.add('instruction', style);
 		_show(obj);
 		if (delay > 0) {
@@ -1126,7 +1137,7 @@ const Game = (function(){
 	function onCardSelect(card) {
 		if (_selectionDone || _status == Status.over) return;
 		if (_players.length > 1 && _player == null) {
-			instruction('Select player first', 'error', 2000);
+			instruction('Select player first', 'red', 2000);
 			return;
 		}
 
@@ -1352,12 +1363,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	window.addEventListener('resize', () => Game.resize());
 });
 
-function menuSwitch() {
+function menuSwitch(to = '') {
 	const menu = _id('controls');
-	if (_visible(menu)) _hide(menu);
-	else {
-		_id('btnReplay').classList.toggle('disabled', Game.status() !== Status.over);
-		_show(menu);
+	if (_visible(menu)) {
+		if (to !== 'on') _hide(menu);
+	} else {
+		if (to !== 'off') {
+			_id('btnReplay').classList.toggle('disabled', Game.status() !== Status.over);
+			_show(menu);
+		}
 	}
 }
 return Game;
