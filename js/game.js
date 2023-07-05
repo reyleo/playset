@@ -1328,12 +1328,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		Game.init();
 	}, 10);
 
-
+/*
 	_id('btnHint').addEventListener(eventName, function(ev) {
 		Game.hint(ev.target);
 		menuSwitch();
 	});
-
+*/
 	_id('btnStart').addEventListener(eventName, function(){
 		Game.restart();
 		menuSwitch();
