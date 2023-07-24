@@ -88,7 +88,7 @@ Player.prototype.setPosition = function(position) {
 	} else if (position === 'right' || position === 'left') {
 		this.layout = 'vertical';
 	} else {
-		player.class = '';
+		this.class = '';
 		return;
 	}
 	this.position = position;
@@ -196,7 +196,6 @@ const Game = (function(){
 
 	function updateTime (timer) {
 		_clockWidget.innerHTML = timer.toString();
-		//saveTime(timer);
 	}
 
 	function isSinglePlayer() {
@@ -262,12 +261,6 @@ const Game = (function(){
 		return false;
 	}
 
-	function saveTime(timer) {
-		if (_isStorageAvailable) {
-			localStorage.setItem('time', timer.getTime());
-		}
-	}
-
 	function save() {
 		if (!_isStorageAvailable) return;
 
@@ -287,7 +280,6 @@ const Game = (function(){
 		const data = JSON.stringify(state);
 		//debug('Saving data: ' + data);
 		localStorage.setItem('data', data);
-		//saveTime(_clockTimer);
 	}
 
 	function copyPlayer(player) {
@@ -335,7 +327,7 @@ const Game = (function(){
 	}
 
 	function deal(animate = false) {
-		let places = document.querySelectorAll('#gameBoard .cardHolder');
+		let places = _qa('#gameBoard .cardHolder');
 		let elem, card, count = 0;
 
 		// remove animation
@@ -589,14 +581,14 @@ const Game = (function(){
 
 	function resetScore() {
 		_players.forEach((player) => player.resetScore());
-		document.querySelectorAll('.win-counter,.fail-counter').forEach((el) => el.innerHTML = '0');
+		_qa('.win-counter,.fail-counter').forEach((el) => el.innerHTML = '0');
 	}
 
 	function clear() {
 		clearTimers();
 		cards().forEach((card) => card.remove());
 		_player = null;
-		document.querySelectorAll('.player-area').forEach((el) => el.classList.remove('clicked', 'winner', 'queue'));
+		_qa('.player-area').forEach((el) => el.classList.remove('clicked', 'winner', 'queue'));
 		let columnRemoved = false;
 		_board.querySelectorAll('.column').forEach(function(col, index) {
 			if (index > config.columns-1) {
@@ -631,7 +623,7 @@ const Game = (function(){
 			applyStyle(cardHolder, cardHolderCss());
 			column.appendChild(cardHolder);
 		}
-		document.getElementById('columns').appendChild(column);
+		_id('columns').appendChild(column);
 	}
 
 	function calcHeight() {
@@ -702,7 +694,7 @@ const Game = (function(){
 		cols.forEach((el) => applyStyle(el, columnStyle));
 		let colCount = cols.length;
 		let realWidth = (config.cardWidth + colMargin * 2) * colCount;
-		document.getElementById('columns').style.width = realWidth + 'px';
+		_id('columns').style.width = realWidth + 'px';
 	}
 
 	function resize() {
@@ -716,9 +708,10 @@ const Game = (function(){
 			'padding-bottom': noPadding,
 			'padding-left':   noPadding
 		};
-		_players.map(player => 'padding-' + player.position).forEach(property => css[property] = playerPadding);
+		_players.map(player => 'padding-' + player.position)
+			.forEach(property => css[property] = playerPadding);
 		// apply paddings
-		applyStyle(document.getElementById('gameContainer'), css);
+		applyStyle(_id('gameContainer'), css);
 		// recalculate cards
 		let newHeight = calcHeight();
 		if (config.cardHeight != newHeight) {
@@ -764,7 +757,7 @@ const Game = (function(){
 	function init() {
 		_board = document.getElementById("gameBoard");
 
-		document.getElementById('gameInfo').innerHTML = version;
+		_id('gameInfo').innerHTML = version;
 
 		boardPadding = _board.offsetTop;
 		_isStorageAvailable = storageAvailable();
