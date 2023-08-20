@@ -1,6 +1,6 @@
 const _Game = (function(){
 
-const version = "0.2.2";
+const version = "0.2.3";
 const svgNS = "http://www.w3.org/2000/svg";
 const xlinkNS = "http://www.w3.org/1999/xlink";
 
@@ -1158,10 +1158,12 @@ const Game = (function(){
 
 		if (checkSet(selection)) {
 			// correct SET
+			playerWins();
 			selection.forEach((el) => el.remove());
 			let columns = _board.querySelectorAll('.column');
 			let moveIndex = 0;
-			if (columns.length > config.columns) {
+			// if we have extra column and set available - rearrange cards
+			if (columns.length > config.columns && findSet() != null) {
 				const lastColumn = columns.item(columns.length-1);
 				const movers = lastColumn.querySelectorAll('.card');
 				for (let col = 0; col < columns.length-1; col++) {
@@ -1177,13 +1179,8 @@ const Game = (function(){
 				debug("1 column removed");
 			} else {
 				deal(true);
+				checkForMore();
 			}
-			playerWins();
-
-			// Check if we need more cards
-			checkForMore();
-
-
 		} else {
 			wrongSet(selection);
 			playerFail();
