@@ -173,22 +173,26 @@ svg.icon {
 	border-left: 12pt solid #000;
 	border-right: 12pt solid transparent;
 }
+#gameMessage > span {
+	display: inline-block;
+	font-size: 16pt;
+	text-align: center;
+	line-height: 24pt;
+	width: 100%;
+}
 .instruction {
 	box-sizing: border-box;
 	position: absolute;
-	height: 36pt;
 	padding: 6pt;
-	line-height: 24pt;
-	font-size: 16pt;
-	text-align: center;
+	height: auto;
+	width: calc(100% - 72pt);
 	top: 50%;
 	margin-top: -18pt;
-	width: 60%;
-	margin-left: 20%;
-	margin-right: 20%;
+	margin-left: 36pt;
+	margin-right: 36pt;
 	border-radius: 12pt;
 }
-.instruction.error {
+.instruction.red {
 	background-color: rgba(153, 51, 51, 1);
 	color: #EEE;
 }

@@ -75,12 +75,16 @@
 			opacity: 1;
 		}
 	}
-	
+
 	.selected {
 		/*border-color: black;*/
 		/*background-color: lightgray;*/
 		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
 		background-color: #AAA;
+	}
+	.wrong-selection {
+		box-shadow: 0 10px 20px rgba(0,0,0,0.19);
+		background-color: #A00;
 	}
 	.hint {
 		background-color: #ec0;
@@ -335,6 +339,7 @@
 		font-size: 16pt;
 		text-align: center;
 		border-radius: 0 0 12pt 12pt;
+		z-index: 200;
 	}
 	.card svg {
 		width: 100%;
