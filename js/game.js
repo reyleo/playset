@@ -869,7 +869,6 @@ const Game = (function(){
 		}
 		menuSwitch('off');
 		_hide(_id('menuSwitch'))
-		_status = Status.init;
 	}
 
 	function onPlayerAreaSelect(event) {
@@ -1054,6 +1053,7 @@ const Game = (function(){
 	}
 
 	function runSetup() {
+		_status = Status.init;
 		_setup.player = 0;
 		_setup.next = true;
 		window.setTimeout(setupPlayer, 10);
