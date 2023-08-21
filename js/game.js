@@ -1191,6 +1191,8 @@ const Game = (function(){
 
 	function autoPlay(delay = 500) {
 		let set = findSet();
+		// set replay mode to not set top results
+		_replayMode = true;
 		if (set != null) {
 			set.forEach((card) => card.classList.add('selected'));
 
