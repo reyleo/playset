@@ -1,16 +1,15 @@
 # Set Card Game
-HTML5 version of Set Card Game
+Online version of [Set Card Game](https://en.wikipedia.org/wiki/Set_(card_game))
 
-Works on:
- * iPad
- * Android with modern browser
+[Play now!](https://reyleo.github.io/playset/)
 
-Optimized for touch interfaces, but works on desktops as well.
+* Works in any modern browser
+* Optimized for touch interfaces, but works on desktops as well.
 
-Features:
+###Features
 * Up to 6 players
 * Timer in the single player mode
-* Top scores
+* Top results
 * Pause/resume
 * Replay last game
 
