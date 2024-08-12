@@ -305,7 +305,7 @@ const Game = (function(){
 
 	function getBoard() {
 		let board = [];
-		_board.querySelectorAll('.cardHolder').forEach(function(holder) {
+		_board.querySelectorAll('.cardHolder').forEach((holder) => {
 			const cardElem = holder.querySelector('.card');
 			board.push(cardElem !== null? cardElem.card.toArray() : null);
 		});
@@ -317,7 +317,7 @@ const Game = (function(){
 		if (board.length > (config.rows * columns.length)) {
 			appendColumn();
 		}
-		_board.querySelectorAll('.cardHolder').forEach(function(holder, index) {
+		_board.querySelectorAll('.cardHolder').forEach((holder, index) => {
 			const card = holder.querySelector('.card')
 			if (card) card.remove();
 			if (board[index] != null) {
@@ -374,9 +374,7 @@ const Game = (function(){
 				}
 			}
 		}
-		if (setNotFound) {
-			gameOver();
-		}
+		if (setNotFound) gameOver();
 	}
 
 	function gameOver() {
@@ -454,7 +452,7 @@ const Game = (function(){
 	function showTopResults(current = -1) {
 		var list = document.querySelector('#topResults ol');
 		list.innerHTML = '';
-		_topResults.forEach(function(_top, index) {
+		_topResults.forEach((_top, index) => {
 			var item = document.createElement('li');
 			item.insertAdjacentText('afterbegin', Timer.formatTime(_top.time));
 			item.insertAdjacentHTML('beforeend',`<span class="date">${_top.date}</span>`);
@@ -590,7 +588,7 @@ const Game = (function(){
 		_player = null;
 		_qa('.player-area').forEach((el) => el.classList.remove('clicked', 'winner', 'queue'));
 		let columnRemoved = false;
-		_board.querySelectorAll('.column').forEach(function(col, index) {
+		_board.querySelectorAll('.column').forEach((col, index) => {
 			if (index > config.columns-1) {
 				col.remove();
 				columnRemoved = true;
@@ -1099,13 +1097,6 @@ const Game = (function(){
 			(a1 != a2 && a1 != a3 && a2 != a3));
 	}
 
-	function error(msg) {
-		_show(_id('#errorMessage').parentNode);
-		window.setTimeout(function(){
-				_hide(_id('#errorMessage').parentNode);
-			}, 1000);
-	};
-
 	function cards() {
 		return _board.querySelectorAll('.card');
 	}
@@ -1117,13 +1108,11 @@ const Game = (function(){
 			cards().forEach((card) => card.classList.remove('hint', 'selected'));
 		}
 		if (set) {
-			//instruction('Set exists!', 'green', 2000);
 			if (config.showSetOnHint) {
 				set.forEach((card) => card.classList.add('hint'));
 			}
 		} else {
 			instruction('Not found!', 'error', 2000);
-			//showMessage('No set found', 1000);
 		}
 	}
 
