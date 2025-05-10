@@ -3,111 +3,115 @@ const _Game = (function(){
 const version = "0.2.3";
 const svgNS = "http://www.w3.org/2000/svg";
 
-function Card(p) {
-	this.color = p[0];
-	this.shape = p[1];
-	this.quantity = p[2] + 1;
-	this.fill = p[3];
-}
-Card.prototype.toString = function() {
-	return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
-}
-Card.prototype.toArray = function() {
-	return [this.color, this.shape, this.quantity - 1, this.fill];
-}
-Card.prototype._shapes = ["pill", "curve", "rhomb"];
-Card.prototype._colors = ["red", "green", "purple"];
-Card.prototype._fills = ["empty", "filled", "stripes"];
+class Card {
+	_shapes = ["pill", "curve", "rhomb"];
+	_colors = ["red", "green", "purple"];
+	_fills = ["empty", "filled", "stripes"];
 
-Card.prototype.render = function(cardElem) {
-	if (cardElem != null) {
-		if (cardElem.hasChildNodes()) {
-			cardElem.removeChild(cardElem.firstChild);
-		}
-
-		let group = document.createElement('div');
-		group.classList.add('group', 'group' + this.quantity);
-		for (let i = 0; i < this.quantity; i++) {
-			group.appendChild(this.createSymbol());
-		}
-		cardElem.appendChild(group);
+	constructor(p) {
+		this.color = p[0];
+		this.shape = p[1];
+		this.quantity = p[2] + 1;
+		this.fill = p[3];
 	}
-};
-
-Card.prototype.createSymbol = function() {
-	let svg = document.createElementNS(svgNS, "svg");
-	svg.setAttribute('class', "symbol");
-	svg.setAttribute('viewBox','0 0 200 100');
-	svg.style.width = "100%";
-
-	let symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
-	symbol.removeAttribute('id');
-	symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
-	svg.appendChild(symbol);
-	return svg;
-};
-
-
-function Player(id) {
-
-	if (!(this instanceof Player)) {
-		return new Player(id);
+	toString () {
+		return this.color + ', ' + this.shape + ', ' + this.quantity + ', ' + this.fill;
 	}
-	this.id = id;
-	this.name = "";
-	this.wins = 0;
-	this.fails = 0;
-	this.layout = '';
-	this.class = '';
-	this.position = '';
-	this.area = null;
+	toArray () { 
+		return [this.color, this.shape, this.quantity - 1, this.fill];
+	}
+	render (cardElem) {
+		if (cardElem != null) {
+			if (cardElem.hasChildNodes()) {
+				cardElem.removeChild(cardElem.firstChild);
+			}
+
+			let group = document.createElement('div');
+			group.classList.add('group', 'group' + this.quantity);
+			for (let i = 0; i < this.quantity; i++) {
+				group.appendChild(this.createSymbol());
+			}
+			cardElem.appendChild(group);
+		}
+	}
+
+	createSymbol () {
+		let svg = document.createElementNS(svgNS, "svg");
+		svg.setAttribute('class', "symbol");
+		svg.setAttribute('viewBox','0 0 200 100');
+		svg.style.width = "100%";
+
+		let symbol = document.getElementById("symbol-" + this._shapes[this.shape]).cloneNode();
+		symbol.removeAttribute('id');
+		symbol.setAttribute('class', this._colors[this.color] + " " + this._fills[this.fill]);
+		svg.appendChild(symbol);
+		return svg;
+	}
+
 }
 
-Player.prototype.resetScore = function() {
-	this.wins = 0;
-	this.fails = 0;
-};
+class Player {
 
-Player.prototype.points = function() {
-	return this.wins - this.fails;
-};
-
-Player.prototype.isValid = function() {
-	return this.class !== '' && typeof this.id !== undefined;
-};
-
-Player.prototype.isTopPosition = function() {
-	return this.class === 'player-top';
-}
-
-Player.prototype.setPosition = function(position) {
-	if (position === 'top' || position === 'bottom') {
-		this.layout = 'horizontal';
-	} else if (position === 'right' || position === 'left') {
-		this.layout = 'vertical';
-	} else {
+	constructor(id) {
+		this.id = id;
+		this.name = "";
+		this.wins = 0;
+		this.fails = 0;
+		this.layout = '';
 		this.class = '';
-		return;
+		this.position = '';
+		this.area = null;
 	}
-	this.position = position;
-	this.class = 'player-' + position;
-};
 
-Player.prototype.increaseWins = function() {
-	this.wins++;
-	this.area.querySelector('.win-counter').innerHTML = this.wins;
-	this.area.classList.remove('clicked');
-	const timer = this.area.querySelector('.player-timer');
-	if (timer) timer.remove();
-};
+	resetScore () {
+		this.wins = 0;
+		this.fails = 0;
+	}
 
-Player.prototype.increaseFails = function() {
-	this.fails++;
-	this.area.querySelector('.fail-counter').innerHTML = this.fails;
-	this.area.classList.remove('clicked');
-	const timer = this.area.querySelector('.player-timer');
-	if (timer) timer.remove();
-};
+	points () {
+		return this.wins - this.fails;
+	}
+
+	isValid () {
+		return this.class !== '' && typeof this.id !== undefined;
+	}
+
+	isTopPosition () {
+		return this.class === 'player-top';
+	}
+
+	setPosition (position) {
+		if (position === 'top' || position === 'bottom') {
+			this.layout = 'horizontal';
+		} else if (position === 'right' || position === 'left') {
+			this.layout = 'vertical';
+		} else {
+			this.class = '';
+			return;
+		}
+		this.position = position;
+		this.class = 'player-' + position;
+	}
+
+	increaseWins () {
+		this.wins++;
+		this.area.querySelector('.win-counter').innerHTML = this.wins;
+		this.area.classList.remove('clicked');
+		this.removeTimer();
+	}
+
+	increaseFails () {
+		this.fails++;
+		this.area.querySelector('.fail-counter').innerHTML = this.fails;
+		this.area.classList.remove('clicked');
+		this.removeTimer();
+	}
+
+	removeTimer () {
+		const timer = this.area.querySelector('.player-timer');
+		if (timer) timer.remove();
+	}
+}
 
 const Status = { active: 0, pause: 1, over: 2, init: 3 };
 
