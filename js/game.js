@@ -2,8 +2,6 @@ const _Game = (function(){
 
 const version = "0.2.3";
 const svgNS = "http://www.w3.org/2000/svg";
-const xlinkNS = "http://www.w3.org/1999/xlink";
-
 
 function Card(p) {
 	this.color = p[0];
@@ -1357,3 +1355,16 @@ function menuSwitch(to = '') {
 }
 return Game;
 })();
+
+const registerServiceWorker = async () => {
+	if ("serviceWorker" in navigator) {
+	  try {
+		await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+	  } catch (error) {
+		console.error(`Registration failed with ${error}`);
+	  }
+	}
+  };
+  
+registerServiceWorker();
+  
