@@ -1063,7 +1063,7 @@ const Game = (function(){
 		_players = [];
 		_qa('.player-area').forEach((area) => area.remove());
 		for (let id = 0; id < count; id++) {
-			_players.push(Player(id));
+			_players.push(new Player(id));
 		}
 	}
 
