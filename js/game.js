@@ -1,6 +1,6 @@
 const _Game = (function(){
 
-const version = "0.2.3";
+const version = "0.3.0";
 const svgNS = "http://www.w3.org/2000/svg";
 
 class Card {

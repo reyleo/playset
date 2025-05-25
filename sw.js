@@ -1,4 +1,4 @@
-const CACHE_NAME = 'playset-v99';
+const CACHE_NAME = 'playset-v100';
 
 // A list of local resources we always want to be cached.
 const CACHE_FILES = [
