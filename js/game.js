@@ -66,6 +66,8 @@ class Player {
 	resetScore () {
 		this.wins = 0;
 		this.fails = 0;
+		this.area.querySelector('.win-counter').innerHTML = this.wins;
+		this.area.querySelector('.fail-counter').innerHTML = this.fails;
 	}
 
 	points () {
@@ -581,7 +583,6 @@ const Game = (function(){
 
 	function resetScore() {
 		_players.forEach((player) => player.resetScore());
-		_qa('.win-counter,.fail-counter').forEach((el) => el.innerHTML = '0');
 	}
 
 	function clear() {
@@ -618,9 +619,10 @@ const Game = (function(){
 	function appendColumn() {
 		let column = _el('div', 'column');
 		column.style.width = config.cardWidth + 'px';
+		const cardHolderStyle = cardHolderCss();
 		for (let j = 0; j < config.rows; j++) {
 			let cardHolder = _el('div', 'cardHolder');
-			applyStyle(cardHolder, cardHolderCss());
+			applyStyle(cardHolder, cardHolderStyle);
 			column.appendChild(cardHolder);
 		}
 		_id('columns').appendChild(column);
@@ -730,7 +732,7 @@ const Game = (function(){
 	}
 
 	function clickPause(e) {
-
+		e.preventDefault();
 		if (_status != Status.active && _status != Status.pause) return;
 		if (_clockTimer.isRunning()) {
 			_clockTimer.pause();
@@ -743,7 +745,6 @@ const Game = (function(){
 			_show(_board);
 			_userPause = false;
 		}
-		e.preventDefault();
 	}
 
 	function lookUp(root, el, filter) {
